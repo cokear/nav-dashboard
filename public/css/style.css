@@ -359,13 +359,15 @@ body {
 
   /* 搜索框 */
   .header-simple {
-    padding: 0.5rem 0;
+    padding: 0.5rem 2.5rem 0.5rem 0.5rem;
     margin-bottom: 0.5rem;
+    position: relative;
   }
 
   .search-box-center {
-    max-width: 90%;
+    max-width: 85%;
     padding: 0.4rem 0.6rem;
+    margin-right: 0;
   }
 
   .search-box-center .search-engine-select {
@@ -375,7 +377,7 @@ body {
 
   .search-box-center .search-input {
     font-size: 0.85rem;
-    min-width: 80px;
+    min-width: 60px;
   }
 
   .search-box-center .search-btn {
@@ -385,8 +387,11 @@ body {
   }
 
   .admin-link {
+    position: absolute;
     right: 0.5rem;
-    font-size: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
   }
 }
 
