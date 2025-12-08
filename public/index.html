@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>导航站 - 磨砂玻璃风格</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
   <!-- 主容器 -->
   <div class="container">
-    
+
     <!-- 头部区域 -->
     <header class="header glass-effect">
       <div class="header-content">
@@ -17,18 +19,13 @@
           <span class="logo-icon">🧭</span>
           <span class="logo-text">导航站</span>
         </h1>
-        
+
         <!-- 搜索框 -->
         <div class="search-box">
-          <input 
-            type="text" 
-            id="searchInput" 
-            class="search-input" 
-            placeholder="搜索站点..."
-          >
+          <input type="text" id="searchInput" class="search-input" placeholder="搜索站点...">
           <span class="search-icon">🔍</span>
         </div>
-        
+
         <a href="/admin.html" class="admin-btn glass-effect">
           <span>⚙️</span>
           <span>管理</span>
@@ -42,10 +39,6 @@
       <aside class="sidebar glass-effect">
         <h3 class="sidebar-title">分类</h3>
         <div id="categoriesList" class="categories-sidebar">
-          <button class="category-tab active" data-category="all">
-            <span>📚</span>
-            <span>全部</span>
-          </button>
           <!-- 动态加载分类 -->
         </div>
       </aside>
@@ -81,4 +74,5 @@
 
   <script src="/js/main.js"></script>
 </body>
+
 </html>
