@@ -21,26 +21,12 @@ export default {
                 return await handleAPI(request, env, pathname, corsHeaders);
             }
 
-            // 调试：列出所有可用的静态文件
-            if (pathname === '/debug/assets') {
-                try {
-                    const list = await env.__STATIC_CONTENT.list();
-                    return new Response(JSON.stringify(list, null, 2), {
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                } catch (e) {
-                    return new Response('__STATIC_CONTENT not available: ' + e.message, {
-                        headers: { 'Content-Type': 'text/plain' }
-                    });
-                }
-            }
-
             // 静态文件处理
             return await serveStatic(pathname, env);
 
         } catch (error) {
             console.error('Error:', error);
-            return new Response('Error: ' + error.message + '\nStack: ' + error.stack, {
+            return new Response('Error: ' + error.message, {
                 status: 500,
                 headers: { 'Content-Type': 'text/plain' }
             });
@@ -51,57 +37,65 @@ export default {
 // 提供静态文件
 async function serveStatic(pathname, env) {
     try {
-        // 检查 __STATIC_CONTENT 是否存在
         if (!env.__STATIC_CONTENT) {
-            return new Response('__STATIC_CONTENT is not available. Please check wrangler.toml configuration.', {
-                status: 500,
-                headers: { 'Content-Type': 'text/plain' }
-            });
+            return new Response('__STATIC_CONTENT is not available', { status: 500 });
         }
 
-        // 处理根路径
-        let assetPath = pathname === '/' ? 'index.html' : pathname.substring(1);
+        // 处理根路径和文件路径
+        let requestedFile = pathname === '/' ? 'index.html' : pathname.substring(1);
 
-        console.log('Trying to load asset:', assetPath);
+        // 列出所有文件以查找匹配的哈希文件
+        const list = await env.__STATIC_CONTENT.list();
+        const files = list.keys.map(k => k.name);
 
-        // 从 __STATIC_CONTENT 获取文件
-        const content = await env.__STATIC_CONTENT.get(assetPath);
+        // 查找匹配的文件（考虑内容哈希）
+        let actualFile = null;
+
+        if (requestedFile === 'index.html' || requestedFile === 'admin.html') {
+            // HTML 文件：index.*.html 或 admin.*.html
+            const baseName = requestedFile.replace('.html', '');
+            actualFile = files.find(f => f.match(new RegExp(`^${baseName}\\.[a-f0-9]+\\.html$`)));
+        } else if (requestedFile.startsWith('css/') || requestedFile.startsWith('js/')) {
+            // CSS/JS 文件：css/style.*.css 或 js/main.*.js
+            const parts = requestedFile.split('/');
+            const dir = parts[0];
+            const fileName = parts[1].replace(/\.(css|js)$/, '');
+            const ext = parts[1].split('.').pop();
+            actualFile = files.find(f => f.match(new RegExp(`^${dir}/${fileName}\\.[a-f0-9]+\\.${ext}$`)));
+        } else {
+            // 其他文件直接查找
+            actualFile = files.find(f => f === requestedFile);
+        }
+
+        // 如果找不到请求的文件，尝试返回 index.html（用于 SPA）
+        if (!actualFile) {
+            actualFile = files.find(f => f.match(/^index\.[a-f0-9]+\.html$/));
+            if (!actualFile) {
+                return new Response('Not Found', { status: 404 });
+            }
+        }
+
+        // 从 KV 获取文件内容
+        const content = await env.__STATIC_CONTENT.get(actualFile);
 
         if (!content) {
-            console.log('Asset not found:', assetPath);
-            // 尝试作为 SPA，返回 index.html
-            const indexContent = await env.__STATIC_CONTENT.get('index.html');
-            if (indexContent) {
-                return new Response(indexContent, {
-                    headers: {
-                        'Content-Type': 'text/html;charset=UTF-8',
-                        'Cache-Control': 'no-cache',
-                    },
-                });
-            }
-            return new Response(`Not Found: ${assetPath}\n\nTry /debug/assets to see available files`, {
-                status: 404,
-                headers: { 'Content-Type': 'text/plain' }
-            });
+            return new Response('File not found in storage', { status: 404 });
         }
 
         // 确定 Content-Type
-        const contentType = getContentType(assetPath);
+        const contentType = getContentType(actualFile);
 
         return new Response(content, {
             headers: {
                 'Content-Type': contentType,
-                'Cache-Control': assetPath.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico)$/)
+                'Cache-Control': actualFile.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico)$/)
                     ? 'public, max-age=31536000'
                     : 'public, max-age=3600',
             },
         });
     } catch (error) {
         console.error('Static file error:', error);
-        return new Response('Error: ' + error.message + '\nStack: ' + error.stack, {
-            status: 500,
-            headers: { 'Content-Type': 'text/plain' }
-        });
+        return new Response('Error: ' + error.message, { status: 500 });
     }
 }
 
