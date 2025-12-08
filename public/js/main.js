@@ -138,17 +138,30 @@ function createSiteCard(site) {
     return card;
 }
 
-// 搜索功能
+// 搜索引擎功能
 function setupSearch() {
     const searchInput = document.getElementById('searchInput');
-    let searchTimeout;
+    const searchBtn = document.getElementById('searchBtn');
+    const searchEngine = document.getElementById('searchEngine');
 
-    searchInput.addEventListener('input', (e) => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            const categoryId = document.querySelector('.category-tab.active')?.dataset.category || 'all';
-            loadSites(categoryId, e.target.value);
-        }, 300);
+    const engines = {
+        google: 'https://www.google.com/search?q=',
+        bing: 'https://www.bing.com/search?q=',
+        baidu: 'https://www.baidu.com/s?wd=',
+        duckduckgo: 'https://duckduckgo.com/?q='
+    };
+
+    function doSearch() {
+        const query = searchInput.value.trim();
+        if (query) {
+            const engine = searchEngine.value;
+            window.open(engines[engine] + encodeURIComponent(query), '_blank');
+        }
+    }
+
+    searchBtn.addEventListener('click', doSearch);
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') doSearch();
     });
 }
 

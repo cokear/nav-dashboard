@@ -11,11 +11,17 @@
 <body>
   <div class="container">
 
-    <!-- 简化顶栏：只有搜索框 -->
+    <!-- 顶栏：搜索引擎 -->
     <header class="header-simple">
       <div class="search-box-center glass-effect">
-        <span class="search-icon">🔍</span>
+        <select id="searchEngine" class="search-engine-select">
+          <option value="google">Google</option>
+          <option value="bing">Bing</option>
+          <option value="baidu">百度</option>
+          <option value="duckduckgo">DuckDuckGo</option>
+        </select>
         <input type="text" id="searchInput" class="search-input" placeholder="搜索...">
+        <button id="searchBtn" class="search-btn">🔍</button>
       </div>
       <a href="/admin.html" class="admin-link" title="管理">⚙️</a>
     </header>
