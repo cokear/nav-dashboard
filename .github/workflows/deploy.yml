@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare (全自动)
+name: Deploy to Cloudflare
 
 on:
   push:
@@ -8,13 +8,11 @@ on:
 
 env:
   PROJECT_NAME: nav-dashboard
-  D1_DATABASE_NAME: nav-dashboard-db
-  KV_NAMESPACE_NAME: nav-images
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: 全自动部署
+    name: 部署到 Cloudflare
     
     steps:
       - name: Checkout
@@ -28,76 +26,42 @@ jobs:
       - name: Install Wrangler
         run: npm install -g wrangler
 
-      - name: 检查并创建 D1 数据库
-        id: check-d1
+      - name: 更新配置文件（使用 Secrets）
         run: |
-          echo "检查 D1 数据库是否存在..."
+          echo "使用 Secrets 更新 wrangler.toml..."
           
-          # 尝试列出数据库
-          DB_LIST=$(wrangler d1 list --json 2>/dev/null || echo "[]")
+          # 创建临时配置文件
+          cat > wrangler.toml << EOF
+          name = "nav-dashboard"
+          main = "src/index.js"
+          compatibility_date = "2024-01-01"
           
-          # 检查数据库是否存在
-          DB_ID=$(echo "$DB_LIST" | jq -r ".[] | select(.name==\"${{ env.D1_DATABASE_NAME }}\") | .uuid" | head -n 1)
+          # D1 数据库绑定
+          [[d1_databases]]
+          binding = "DB"
+          database_name = "nav-dashboard-db"
+          database_id = "${{ secrets.D1_DATABASE_ID }}"
           
-          if [ -z "$DB_ID" ] || [ "$DB_ID" = "null" ]; then
-            echo "数据库不存在，正在创建..."
-            CREATE_OUTPUT=$(wrangler d1 create ${{ env.D1_DATABASE_NAME }} --json)
-            DB_ID=$(echo "$CREATE_OUTPUT" | jq -r '.uuid // .database_id // empty')
-            echo "✅ D1 数据库已创建: $DB_ID"
-          else
-            echo "✅ D1 数据库已存在: $DB_ID"
-          fi
+          # KV 命名空间绑定
+          [[kv_namespaces]]
+          binding = "KV"
+          id = "${{ secrets.KV_NAMESPACE_ID }}"
           
-          echo "db_id=$DB_ID" >> $GITHUB_OUTPUT
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Pages 配置
+          pages_build_output_dir = "public"
+          EOF
+          
+          echo "✅ 配置文件已更新"
+          cat wrangler.toml
 
       - name: 初始化 D1 数据库
         run: |
           echo "初始化数据库..."
-          wrangler d1 execute ${{ env.D1_DATABASE_NAME }} --file=./schema.sql --yes || echo "数据库可能已初始化"
+          wrangler d1 execute nav-dashboard-db --file=./schema.sql --yes || echo "数据库可能已初始化"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      - name: 检查并创建 KV 命名空间
-        id: check-kv
-        run: |
-          echo "检查 KV 命名空间是否存在..."
-          
-          # 列出 KV 命名空间
-          KV_LIST=$(wrangler kv:namespace list --json 2>/dev/null || echo "[]")
-          
-          # 查找匹配的命名空间
-          KV_ID=$(echo "$KV_LIST" | jq -r ".[] | select(.title | contains(\"${{ env.KV_NAMESPACE_NAME }}\")) | .id" | head -n 1)
-          
-          if [ -z "$KV_ID" ] || [ "$KV_ID" = "null" ]; then
-            echo "KV 命名空间不存在，正在创建..."
-            CREATE_OUTPUT=$(wrangler kv:namespace create ${{ env.KV_NAMESPACE_NAME }} 2>&1)
-            KV_ID=$(echo "$CREATE_OUTPUT" | grep -oP 'id = "\K[^"]+' | head -n 1)
-            echo "✅ KV 命名空间已创建: $KV_ID"
-          else
-            echo "✅ KV 命名空间已存在: $KV_ID"
-          fi
-          
-          echo "kv_id=$KV_ID" >> $GITHUB_OUTPUT
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      - name: 更新 wrangler.toml
-        run: |
-          echo "更新配置文件..."
-          
-          # 更新 D1 database_id
-          sed -i 's/database_id = ".*"/database_id = "${{ steps.check-d1.outputs.db_id }}"/' wrangler.toml
-          
-          # 更新 KV namespace id
-          sed -i 's/id = ".*"/id = "${{ steps.check-kv.outputs.kv_id }}"/' wrangler.toml
-          
-          echo "✅ 配置文件已更新"
-          cat wrangler.toml
+        continue-on-error: true
 
       - name: 部署 Workers
         run: |
@@ -115,36 +79,15 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: 配置 Pages 绑定
-        run: |
-          echo "配置 Pages 绑定..."
-          
-          # 获取 Pages 项目 ID
-          PROJECT_ID=$(wrangler pages project list --json | jq -r ".[] | select(.name==\"${{ env.PROJECT_NAME }}\") | .name")
-          
-          if [ ! -z "$PROJECT_ID" ]; then
-            echo "为 Pages 项目配置 D1 和 KV 绑定..."
-            echo "注意: Pages 绑定需要在 Cloudflare Dashboard 手动配置一次"
-            echo "  1. D1 binding: DB -> ${{ env.D1_DATABASE_NAME }}"
-            echo "  2. KV binding: KV -> ${{ steps.check-kv.outputs.kv_id }}"
-          fi
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
       - name: 部署总结
         run: |
           echo "✅ 部署完成！"
-          echo ""
-          echo "📦 资源信息："
-          echo "  • D1 数据库: ${{ steps.check-d1.outputs.db_id }}"
-          echo "  • KV 命名空间: ${{ steps.check-kv.outputs.kv_id }}"
           echo ""
           echo "🌐 访问地址："
           echo "  • 主页: https://${{ env.PROJECT_NAME }}.pages.dev"
           echo "  • 管理后台: https://${{ env.PROJECT_NAME }}.pages.dev/admin.html"
           echo ""
-          echo "⚠️ 首次部署需要在 Cloudflare Dashboard 配置 Pages 绑定："
+          echo "⚠️ 首次部署后需要配置 Pages 绑定（只需一次）："
           echo "  访问: https://dash.cloudflare.com → Pages → ${{ env.PROJECT_NAME }} → Settings → Functions"
-          echo "  1. 添加 D1 绑定: 变量名 DB, 数据库 ${{ env.D1_DATABASE_NAME }}"
-          echo "  2. 添加 KV 绑定: 变量名 KV, 命名空间选择包含 '${{ env.KV_NAMESPACE_NAME }}' 的"
+          echo "  1. 添加 D1 绑定: 变量名 DB, 数据库 nav-dashboard-db"
+          echo "  2. 添加 KV 绑定: 变量名 KV, 命名空间 ID ${{ secrets.KV_NAMESPACE_ID }}"
