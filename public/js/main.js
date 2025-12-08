@@ -121,17 +121,23 @@ function renderSites(sites) {
     });
 }
 
-// 创建站点卡片（简化：只显示logo和名称，居中）
+// 创建站点卡片（简化：只显示logo和名称）
 function createSiteCard(site) {
     const card = document.createElement('a');
     card.href = site.url;
     card.target = '_blank';
     card.className = 'site-card glass-effect';
 
-    const logo = site.logo || 'https://via.placeholder.com/64?text=' + encodeURIComponent(site.name.charAt(0));
+    const logo = site.logo || '';
+
+    // 如果没有logo，不创建卡片
+    if (!logo) {
+        card.style.display = 'none';
+        return card;
+    }
 
     card.innerHTML = `
-        <img class="site-logo" src="${logo}" alt="${site.name}" onerror="this.src='https://via.placeholder.com/64?text=${encodeURIComponent(site.name.charAt(0))}'">
+        <img class="site-logo" src="${logo}" alt="${site.name}" onerror="this.parentElement.style.display='none'">
         <span class="site-name">${site.name}</span>
     `;
 
