@@ -1,4 +1,4 @@
-// 使用相对路径 - Workers 同时提供前端和 API
+﻿// 使用相对路径 - Workers 同时提供前端和 API
 const API_BASE = '';  // 空字符串表示相对路径
 
 // ==================== 主要功能 ====================
@@ -66,7 +66,7 @@ async function loadSites(categoryId = 'all', searchTerm = '') {
 
 // 渲染分类
 function renderCategories(categories) {
-    const container = document.getElementById('categoryTabs');
+    const container = document.getElementById('categoriesList');
     container.innerHTML = '';
 
     // 添加"全部"标签
