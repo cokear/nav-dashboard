@@ -287,45 +287,48 @@ body {
 
   /* 布局改为纵向 */
   .layout-wrapper {
-    flex-direction: column;
-    gap: 0.5rem;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
   }
 
   /* 侧边栏变为顶部横向滚动 */
   .sidebar {
-    width: 100%;
-    min-height: auto;
-    max-height: none;
-    position: static;
-    padding: 0.5rem;
-    overflow-x: auto;
+    width: 100% !important;
+    min-height: auto !important;
+    max-height: none !important;
+    position: static !important;
+    padding: 0.5rem !important;
+    overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
+    display: block !important;
   }
 
   .categories-sidebar {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 0.5rem;
-    justify-content: flex-start;
-    overflow-x: auto;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 0.5rem !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
     padding-bottom: 0.25rem;
+    display: flex !important;
   }
 
   .categories-sidebar .category-tab {
-    flex-shrink: 0;
-    padding: 0.4rem 0.75rem;
-    font-size: 0.8rem;
-    white-space: nowrap;
+    flex-shrink: 0 !important;
+    padding: 0.4rem 0.75rem !important;
+    font-size: 0.8rem !important;
+    white-space: nowrap !important;
+    width: auto !important;
   }
 
   .categories-sidebar .category-tab span:first-child {
     font-size: 0.9rem;
   }
 
-  /* 站点网格 */
+  /* 站点网格 - 增加行距 */
   .sites-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.5rem;
+    gap: 0.75rem 0.5rem !important;
     padding: 0;
     margin-top: 0.5rem;
     margin-left: 0 !important;
@@ -333,17 +336,17 @@ body {
 
   .site-card {
     width: 100%;
-    padding: 0.5rem 0.6rem;
-    gap: 0.4rem;
+    padding: 0.6rem 0.75rem;
+    gap: 0.5rem;
   }
 
   .site-logo {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
   }
 
   .site-name {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
   }
 
   .site-desc {
