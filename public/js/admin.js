@@ -31,6 +31,11 @@ async function init() {
         updateLogoPreview(e.target.value);
     });
 
+    // 监听站点URL变化，自动获取logo
+    document.getElementById('siteUrl').addEventListener('blur', (e) => {
+        autoFetchLogo(e.target.value);
+    });
+
     // 加载数据
     await loadCategories();
     await loadSites();
@@ -462,6 +467,25 @@ function getDomain(url) {
         return new URL(url).hostname;
     } catch {
         return url;
+    }
+}
+
+// 自动获取网站logo
+function autoFetchLogo(url) {
+    // 如果logo已经手动填写，不要覆盖
+    const logoInput = document.getElementById('siteLogo');
+    if (logoInput.value.trim()) return;
+
+    try {
+        const domain = new URL(url).hostname;
+        // 使用Google Favicon API获取高清logo
+        const googleFavicon = `https://www.google.com/s2/favicons?sz=128&domain=${domain}`;
+
+        // 设置logo URL
+        logoInput.value = googleFavicon;
+        updateLogoPreview(googleFavicon);
+    } catch {
+        // URL无效时不做任何事
     }
 }
 
