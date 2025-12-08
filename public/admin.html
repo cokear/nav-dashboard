@@ -82,6 +82,21 @@
         .back-btn:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+
+        /* 去掉紫色按钮 */
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.2) !important;
+            box-shadow: none !important;
+        }
+
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.2) !important;
+            box-shadow: none !important;
+        }
+
+        .btn-primary:hover {
+            background: rgba(255, 255, 255, 0.3) !important;
+        }
     </style>
 </head>
 
@@ -100,136 +115,150 @@
 
     <div id="adminContent" class="container" style="display:none;">
 
-        <button class="nav-item" data-tab="categories">
-            <span>📁</span>
-            <span>分类管理</span>
-        </button>
-        <button class="nav-item" data-tab="background">
-            <span>🖼️</span>
-            <span>背景设置</span>
-        </button>
-        </nav>
-        </aside>
+        <!-- 左上角返回按钮 -->
+        <a href="/" class="back-btn">🏠 返回</a>
 
-        <!-- 右侧内容 -->
-        <section class="admin-content">
+        <!-- 主内容区 -->
+        <main class="admin-main" style="padding-top: 3rem;">
 
-            <!-- 站点管理面板 -->
-            <div id="sitesPanel" class="content-panel active">
-                <div class="panel-header">
-                    <h2>站点管理</h2>
-                    <button class="btn-primary" onclick="openSiteModal()">
-                        <span>➕</span>
-                        <span>添加站点</span>
+            <!-- 左侧菜单 -->
+            <aside class="admin-sidebar glass-effect">
+                <nav class="admin-nav">
+                    <button class="nav-item active" data-tab="sites">
+                        <span>🌐</span>
+                        <span>站点管理</span>
                     </button>
-                </div>
-
-                <div class="table-container glass-effect">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Logo</th>
-                                <th>名称</th>
-                                <th>URL</th>
-                                <th>分类</th>
-                                <th>描述</th>
-                                <th>排序</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sitesTableBody">
-                            <tr>
-                                <td colspan="7" class="loading-row">
-                                    <div class="loading-spinner"></div>
-                                    <span>加载中...</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 分类管理面板 -->
-            <div id="categoriesPanel" class="content-panel">
-                <div class="panel-header">
-                    <h2>分类管理</h2>
-                    <button class="btn-primary" onclick="openCategoryModal()">
-                        <span>➕</span>
-                        <span>添加分类</span>
+                    <button class="nav-item" data-tab="categories">
+                        <span>📁</span>
+                        <span>分类管理</span>
                     </button>
+                    <button class="nav-item" data-tab="background">
+                        <span>🖼️</span>
+                        <span>背景设置</span>
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- 右侧内容 -->
+            <section class="admin-content">
+
+                <!-- 站点管理面板 -->
+                <div id="sitesPanel" class="content-panel active">
+                    <div class="panel-header">
+                        <h2>站点管理</h2>
+                        <button class="btn-primary" onclick="openSiteModal()">
+                            <span>➕</span>
+                            <span>添加站点</span>
+                        </button>
+                    </div>
+
+                    <div class="table-container glass-effect">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"></th>
+                                    <th>Logo</th>
+                                    <th>名称</th>
+                                    <th>URL</th>
+                                    <th>分类</th>
+                                    <th>描述</th>
+                                    <th>排序</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sitesTableBody">
+                                <tr>
+                                    <td colspan="8" class="loading-row">
+                                        <div class="loading-spinner"></div>
+                                        <span>加载中...</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <div class="table-container glass-effect">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>图标</th>
-                                <th>名称</th>
-                                <th>颜色</th>
-                                <th>站点数</th>
-                                <th>排序</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="categoriesTableBody">
-                            <tr>
-                                <td colspan="6" class="loading-row">
-                                    <div class="loading-spinner"></div>
-                                    <span>加载中...</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                <!-- 分类管理面板 -->
+                <div id="categoriesPanel" class="content-panel">
+                    <div class="panel-header">
+                        <h2>分类管理</h2>
+                        <button class="btn-primary" onclick="openCategoryModal()">
+                            <span>➕</span>
+                            <span>添加分类</span>
+                        </button>
+                    </div>
 
-            <!-- 背景设置面板 -->
-            <div id="backgroundPanel" class="content-panel">
-                <div class="panel-header">
-                    <h2>背景设置</h2>
+                    <div class="table-container glass-effect">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>图标</th>
+                                    <th>名称</th>
+                                    <th>颜色</th>
+                                    <th>站点数</th>
+                                    <th>排序</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categoriesTableBody">
+                                <tr>
+                                    <td colspan="6" class="loading-row">
+                                        <div class="loading-spinner"></div>
+                                        <span>加载中...</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="table-container glass-effect" style="padding: 2rem;">
-                    <form id="backgroundForm" style="max-width: 600px;">
-                        <div class="form-group">
-                            <label for="backgroundUrl">背景图片URL</label>
-                            <input type="url" id="backgroundUrl" class="form-input"
-                                placeholder="https://example.com/image.jpg">
-                        </div>
-                        <div class="form-group">
-                            <label>预设背景（点击即可应用）</label>
-                            <div
-                                style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 0.5rem;">
-                                <button type="button" class="preset-btn"
-                                    data-url="https://images.unsplash.com/photo-1484821582734-6c6c9f99a672?q=80&w=2000&auto=format&fit=crop"
-                                    style="padding: 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; background: white;">
-                                    <img src="https://images.unsplash.com/photo-1484821582734-6c6c9f99a672?q=80&w=200&auto=format&fit=crop"
-                                        style="width: 100%; display: block; border-radius: 6px 6px 0 0;">
-                                    <div style="padding: 0.5rem; text-align: center;">海天一色</div>
-                                </button>
-                                <button type="button" class="preset-btn"
-                                    data-url="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?q=80&w=2000&auto=format&fit=crop"
-                                    style="padding: 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; background: white;">
-                                    <img src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?q=80&w=200&auto=format&fit=crop"
-                                        style="width: 100%; display: block; border-radius: 6px 6px 0 0;">
-                                    <div style="padding: 0.5rem; text-align: center;">桂林山水</div>
-                                </button>
-                                <button type="button" class="preset-btn"
-                                    data-url="https://images.unsplash.com/photo-1505142468610-359e7d316be0?q=80&w=2000&auto=format&fit=crop"
-                                    style="padding: 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; background: white;">
-                                    <img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?q=80&w=200&auto=format&fit=crop"
-                                        style="width: 100%; display: block; border-radius: 6px 6px 0 0;">
-                                    <div style="padding: 0.5rem; text-align: center;">大海</div>
-                                </button>
+
+                <!-- 背景设置面板 -->
+                <div id="backgroundPanel" class="content-panel">
+                    <div class="panel-header">
+                        <h2>背景设置</h2>
+                    </div>
+                    <div class="table-container glass-effect" style="padding: 2rem;">
+                        <form id="backgroundForm" style="max-width: 600px;">
+                            <div class="form-group">
+                                <label for="backgroundUrl">背景图片URL</label>
+                                <input type="url" id="backgroundUrl" class="form-input"
+                                    placeholder="https://example.com/image.jpg">
                             </div>
-                        </div>
-                        <div class="form-actions" style="margin-top: 1.5rem;">
-                            <button type="submit" class="btn-primary">💾 保存背景设置</button>
-                        </div>
-                    </form>
+                            <div class="form-group">
+                                <label>预设背景（点击即可应用）</label>
+                                <div
+                                    style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 0.5rem;">
+                                    <button type="button" class="preset-btn"
+                                        data-url="https://images.unsplash.com/photo-1484821582734-6c6c9f99a672?q=80&w=2000&auto=format&fit=crop"
+                                        style="padding: 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; background: white;">
+                                        <img src="https://images.unsplash.com/photo-1484821582734-6c6c9f99a672?q=80&w=200&auto=format&fit=crop"
+                                            style="width: 100%; display: block; border-radius: 6px 6px 0 0;">
+                                        <div style="padding: 0.5rem; text-align: center;">海天一色</div>
+                                    </button>
+                                    <button type="button" class="preset-btn"
+                                        data-url="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?q=80&w=2000&auto=format&fit=crop"
+                                        style="padding: 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; background: white;">
+                                        <img src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?q=80&w=200&auto=format&fit=crop"
+                                            style="width: 100%; display: block; border-radius: 6px 6px 0 0;">
+                                        <div style="padding: 0.5rem; text-align: center;">桂林山水</div>
+                                    </button>
+                                    <button type="button" class="preset-btn"
+                                        data-url="https://images.unsplash.com/photo-1505142468610-359e7d316be0?q=80&w=2000&auto=format&fit=crop"
+                                        style="padding: 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; background: white;">
+                                        <img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?q=80&w=200&auto=format&fit=crop"
+                                            style="width: 100%; display: block; border-radius: 6px 6px 0 0;">
+                                        <div style="padding: 0.5rem; text-align: center;">大海</div>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-actions" style="margin-top: 1.5rem;">
+                                <button type="submit" class="btn-primary">💾 保存背景设置</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
 
-        </section>
+            </section>
         </main>
     </div>
 

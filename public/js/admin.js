@@ -80,7 +80,7 @@ function renderSitesTable() {
 
     tbody.innerHTML = sites.map(site => `
     <tr data-id="${site.id}">
-      <td class="drag-handle" style="cursor: grab; padding: 0.5rem; color: rgba(255,255,255,0.5);">⋮⋮</td>
+      <td class="drag-handle" style="cursor: grab; padding: 0.5rem; color: rgba(255,255,255,0.6); font-size: 1.2rem; text-align: center;">⋮⋮</td>
       <td>
         <img src="${site.logo || getDefaultLogo(site.url)}" 
              alt="${site.name}" 
