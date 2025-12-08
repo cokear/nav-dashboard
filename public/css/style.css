@@ -623,3 +623,88 @@ body {
   flex-direction: column;
   justify-content: space-evenly;
 }
+
+/* ==================== IP Info Card ==================== */
+.ip-card {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 280px;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  z-index: 1000;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.ip-card.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.ip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ip-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ip-close {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+  transition: var(--transition);
+}
+
+.ip-close:hover {
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.ip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.ip-icon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+/* 移动端适配 */
+@media (max-width: 600px) {
+  .ip-card {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+    transform: translateY(150%);
+  }
+}

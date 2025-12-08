@@ -185,6 +185,23 @@ async function handleAPI(request, env, pathname, corsHeaders) {
         return await getImage(filename, env, corsHeaders);
     }
 
+    // IP Detection API
+    if (pathname === '/api/ip' && method === 'GET') {
+        const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'Unknown';
+        const country = request.cf?.country;
+        const city = request.cf?.city;
+
+        let location = '';
+        if (country) location += country;
+        if (city) location += (location ? ', ' : '') + city;
+
+        return jsonResponse({
+            ip: ip,
+            location: location || 'Unknown Location',
+            isp: request.cf?.asOrganization || 'Unknown ISP'
+        }, 200, corsHeaders);
+    }
+
     return jsonResponse({ success: false, message: 'API Not Found' }, 404, corsHeaders);
 }
 

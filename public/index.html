@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>导航站</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="stylesheet" href="/css/style.css?v=5">
+  <link rel="stylesheet" href="/css/style.css?v=6">
 </head>
 
 <body>
@@ -65,6 +65,28 @@
       GitHub: debbide/nav-dashboard
     </a>
   </footer>
+
+  <!-- IP Info Card -->
+  <div id="ipCard" class="ip-card glass-effect" style="display: none;">
+    <div class="ip-header">
+      <span class="ip-title">👋 欢迎访问</span>
+      <button class="ip-close" onclick="closeIpCard()">×</button>
+    </div>
+    <div class="ip-content">
+      <div class="ip-row">
+        <span class="ip-icon">📍</span>
+        <span id="ipLocation">Loading...</span>
+      </div>
+      <div class="ip-row">
+        <span class="ip-icon">🌐</span>
+        <span id="ipAddress">...</span>
+      </div>
+      <div class="ip-row isp-row">
+        <span class="ip-icon">🏢</span>
+        <span id="ipIsp">...</span>
+      </div>
+    </div>
+  </div>
 
   <script src="/js/main.js"></script>
 </body>

@@ -177,4 +177,48 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCategories();
     loadSites();
     setupSearch();
+    loadIpInfo();
 });
+
+// ==================== IP Info Card ====================
+
+async function loadIpInfo() {
+    try {
+        const response = await fetch(`${API_BASE}/api/ip`);
+        const data = await response.json();
+
+        if (data.ip) {
+            document.getElementById('ipAddress').textContent = data.ip;
+            document.getElementById('ipLocation').textContent = data.location;
+            document.getElementById('ipIsp').textContent = data.isp;
+
+            const card = document.getElementById('ipCard');
+            card.style.display = 'block';
+
+            // 延迟显示动画
+            setTimeout(() => {
+                card.classList.add('show');
+            }, 100);
+
+            // 10秒后自动关闭
+            setTimeout(() => {
+                closeIpCard();
+            }, 10000);
+        }
+    } catch (error) {
+        console.error('加载IP信息失败:', error);
+    }
+}
+
+function closeIpCard() {
+    const card = document.getElementById('ipCard');
+    card.classList.remove('show');
+
+    // 等待动画结束后隐藏
+    setTimeout(() => {
+        card.style.display = 'none';
+    }, 500);
+}
+
+// 暴露给全局以便HTML调用
+window.closeIpCard = closeIpCard;
