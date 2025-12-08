@@ -47,6 +47,10 @@ cd nav-dashboard
 | `D1_DATABASE_ID` | D1 数据库 ID | `wrangler d1 create nav-dashboard-db` |
 | `KV_NAMESPACE_ID` | KV 命名空间 ID | `wrangler kv:namespace create nav-images` |
 
+**API Token 权限配置参考：**
+
+![API Token 权限配置](api-token-permissions.png)
+
 > 💡 详细配置步骤请查看 [GITHUB_DEPLOY.md](GITHUB_DEPLOY.md)
 
 ### 第 3 步：运行部署
