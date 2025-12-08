@@ -64,6 +64,24 @@
             margin-top: 1rem;
             font-size: 0.9rem;
         }
+
+        .back-btn {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 100;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
     </style>
 </head>
 
@@ -82,22 +100,11 @@
 
     <div id="adminContent" class="container" style="display:none;">
 
-        <!-- 头部 -->
-        <header class="header glass-effect">
-            <div class="header-content">
-                <h1 class="logo">
-                    <span class="logo-icon">⚙️</span>
-                    <span class="logo-text">管理后台</span>
-                </h1>
-                <a href="/" class="admin-btn glass-effect">
-                    <span>🏠</span>
-                    <span>返回首页</span>
-                </a>
-            </div>
-        </header>
+        <!-- 左上角返回按钮 -->
+        <a href="/" class="back-btn">🏠 返回</a>
 
         <!-- 主内容区 -->
-        <main class="admin-main">
+        <main class="admin-main" style="padding-top: 1rem;">
 
             <!-- 左侧菜单 -->
             <aside class="admin-sidebar glass-effect">
