@@ -66,7 +66,7 @@ body {
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: var(--spacing-md);
+  padding: 0.75rem;
 }
 
 /* ==================== 头部 ==================== */
@@ -100,7 +100,7 @@ body {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
-/* ==================== 搜索框 ==================== */
+/* ==================== 搜索�?==================== */
 .search-box {
   position: relative;
   flex: 1;
@@ -193,21 +193,21 @@ body {
   background: rgba(255, 255, 255, 0.5);
 }
 
-/* ==================== 站点网格（4列布局） ==================== */
+/* ==================== 站点网格�?列布局�?==================== */
 .main-content {
   margin-bottom: var(--spacing-xl);
 }
 
 .sites-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-md);
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-sm);
 }
 
-/* ==================== 站点卡片（横向布局，参考NavidRome风格） ==================== */
+/* ==================== 站点卡片（横向布局，参考NavidRome风格�?==================== */
 .site-card {
   border-radius: var(--radius-lg);
-  padding: var(--spacing-md);
+  padding: 0.75rem;
   cursor: pointer;
   text-decoration: none;
   color: var(--text-primary);
@@ -215,7 +215,7 @@ body {
   align-items: center;
   gap: var(--spacing-sm);
   transition: var(--transition);
-  height: 70px;
+  height: 60px;
 }
 
 .site-card:hover {
@@ -224,8 +224,8 @@ body {
 }
 
 .site-logo {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-sm);
   object-fit: cover;
   background: rgba(255, 255, 255, 0.4);
@@ -263,7 +263,7 @@ body {
   display: none;
 }
 
-/* ==================== Loading 状态 ==================== */
+/* ==================== Loading 状�?==================== */
 .loading {
   grid-column: 1 / -1;
   display: flex;
@@ -271,7 +271,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: var(--spacing-xl);
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .loading-spinner {
@@ -289,7 +289,7 @@ body {
   }
 }
 
-/* ==================== 空状态 ==================== */
+/* ==================== 空状�?==================== */
 .empty-state {
   grid-column: 1 / -1;
   text-align: center;
@@ -337,7 +337,7 @@ body {
   font-size: 0.9rem;
 }
 
-/* ==================== 响应式设计 ==================== */
+/* ==================== 响应式设�?==================== */
 @media (max-width: 1200px) {
   .sites-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -353,7 +353,7 @@ body {
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
   }
 
   .search-box {
