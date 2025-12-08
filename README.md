@@ -53,25 +53,21 @@ cd nav-dashboard
 
 > 💡 详细配置步骤请查看 [GITHUB_DEPLOY.md](GITHUB_DEPLOY.md)
 
-### 第 3 步：运行部署
+### 第 3 步：初始化数据库（仅首次）
 
 1. 进入 GitHub 仓库的 **Actions** 标签
-2. 选择 **Deploy to Cloudflare**
+2. 选择 **Initialize Database**
 3. 点击 **Run workflow**
+4. 可选择是否导入示例数据
 
-### 第 4 步：配置 Pages 绑定（仅首次）
+### 第 4 步：部署应用
 
-部署完成后，在 [Cloudflare Dashboard](https://dash.cloudflare.com) 配置：
-
-**Pages** → **nav-dashboard** → **Settings** → **Functions**
-
-添加绑定：
-- **D1**: 变量名 `DB` → 数据库 `nav-dashboard-db`
-- **KV**: 变量名 `KV` → 命名空间（包含 `nav-images`）
+1. 选择 **Deploy to Cloudflare**
+2. 点击 **Run workflow**
 
 ### 🎉 完成！
 
-访问：`https://nav-dashboard.pages.dev`
+访问：`https://nav-dashboard.你的账户.workers.dev`
 
 ## 📂 项目结构
 

@@ -1,0 +1,57 @@
+name: Initialize Database
+
+on:
+  workflow_dispatch:
+    inputs:
+      reset_data:
+        description: '是否重置为示例数据（会清空现有数据！）'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    name: 初始化 D1 数据库
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
+      - name: 初始化数据库表结构
+        run: |
+          echo "📦 初始化数据库表结构..."
+          wrangler d1 execute nav-dashboard-db --file=./schema.sql --remote --yes
+          echo "✅ 表结构初始化完成"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: 重置为示例数据（可选）
+        if: ${{ github.event.inputs.reset_data == 'true' }}
+        run: |
+          echo "⚠️ 正在重置为示例数据..."
+          wrangler d1 execute nav-dashboard-db --file=./reset-data.sql --remote --yes
+          echo "✅ 示例数据已导入"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: 完成
+        run: |
+          echo "🎉 数据库初始化完成！"
+          echo ""
+          echo "下一步："
+          echo "  1. 运行 'Deploy to Cloudflare' workflow 部署应用"
+          echo "  2. 访问你的 Workers URL"
