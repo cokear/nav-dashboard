@@ -380,7 +380,9 @@
                 <div class="form-group">
                     <label>Logo</label>
                     <div class="logo-input-group">
-                        <input type="text" id="siteLogo" class="form-input" placeholder="输入远程URL或上传本地图片">
+                        <input type="text" id="siteLogo" class="form-input" placeholder="输入远程URL或点击获取">
+                        <button type="button" class="btn-secondary" onclick="autoFetchLogo()"
+                            style="white-space: nowrap;">🔍 获取</button>
                         <label class="btn-upload">
                             <input type="file" id="logoUpload" accept="image/*" style="display: none;"
                                 onchange="handleLogoUpload(event)">
