@@ -31,15 +31,36 @@ async function init() {
         updateLogoPreview(e.target.value);
     });
 
-    // 动态添加"获取Logo"按钮
+    // 动态添加两个"获取Logo"按钮
     const logoInputGroup = document.querySelector('.logo-input-group');
     if (logoInputGroup) {
-        const fetchBtn = document.createElement('button');
-        fetchBtn.type = 'button';
-        fetchBtn.className = 'btn-upload';
-        fetchBtn.innerHTML = '<span>🔍 获取</span>';
-        fetchBtn.onclick = autoFetchLogo;
-        logoInputGroup.insertBefore(fetchBtn, logoInputGroup.querySelector('.btn-upload'));
+        const uploadBtn = logoInputGroup.querySelector('.btn-upload');
+
+        // 移除HTML中已存在的静态获取按钮（如果有）
+        const existingFetchBtn = logoInputGroup.querySelector('.btn-secondary');
+        if (existingFetchBtn) {
+            existingFetchBtn.remove();
+        }
+
+        // 按钮1: Google Favicon
+        const fetchBtn1 = document.createElement('button');
+        fetchBtn1.type = 'button';
+        fetchBtn1.className = 'btn-secondary';
+        fetchBtn1.style.whiteSpace = 'nowrap';
+        fetchBtn1.innerHTML = '🔍 获取1';
+        fetchBtn1.title = 'Google源';
+        fetchBtn1.onclick = autoFetchLogo;
+        logoInputGroup.insertBefore(fetchBtn1, uploadBtn);
+
+        // 按钮2: toolb.cn Favicon
+        const fetchBtn2 = document.createElement('button');
+        fetchBtn2.type = 'button';
+        fetchBtn2.className = 'btn-secondary';
+        fetchBtn2.style.whiteSpace = 'nowrap';
+        fetchBtn2.innerHTML = '🔍 获取2';
+        fetchBtn2.title = 'toolb.cn源';
+        fetchBtn2.onclick = autoFetchLogo2;
+        logoInputGroup.insertBefore(fetchBtn2, uploadBtn);
     }
 
     // 加载数据
@@ -493,6 +514,28 @@ function autoFetchLogo() {
         logoInput.value = googleFavicon;
         updateLogoPreview(googleFavicon);
         showNotification('Logo获取成功', 'success');
+    } catch {
+        showNotification('URL格式无效', 'error');
+    }
+}
+
+// 使用备选服务获取Logo (toolb.cn)
+function autoFetchLogo2() {
+    const urlInput = document.getElementById('siteUrl');
+    const logoInput = document.getElementById('siteLogo');
+    const url = urlInput.value.trim();
+
+    if (!url) {
+        showNotification('请先输入站点URL', 'error');
+        return;
+    }
+
+    try {
+        const domain = new URL(url).hostname;
+        const toolbFavicon = `https://toolb.cn/favicon/${domain}`;
+        logoInput.value = toolbFavicon;
+        updateLogoPreview(toolbFavicon);
+        showNotification('Logo获取成功 (toolb.cn)', 'success');
     } catch {
         showNotification('URL格式无效', 'error');
     }
