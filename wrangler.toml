@@ -6,17 +6,14 @@ compatibility_date = "2024-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "nav-dashboard-db"
-database_id = "110c9d6b-52d7-4d2c-876b-1c6ba08f22d4"  # 需要替换
+database_id = "110c9d6b-52d7-4d2c-876b-1c6ba08f22d4"
 
-# R2 存储桶绑定
-[[r2_buckets]]
-binding = "BUCKET"
-bucket_name = "nav-dashboard-images"
-
-# 环境变量
-[vars]
-R2_PUBLIC_ID = "f249af155623469d94c5404717ea3888.r2.dev"  # 需要替换为您的 R2 公共域名 ID
+# KV 命名空间绑定（用于图片存储）
+[[kv_namespaces]]
+binding = "KV"
+id = "cb261e73c6414283a804222054699019"
 
 # Pages 配置
 pages_build_output_dir = "public"
+
 

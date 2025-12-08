@@ -64,6 +64,12 @@ async function handleAPI(request, env, pathname, corsHeaders) {
         return await uploadFile(request, env, corsHeaders);
     }
 
+    // 图片访问 API
+    if (pathname.match(/^\/api\/images\/.+$/)) {
+        const filename = pathname.split('/').pop();
+        return await getImage(filename, env, corsHeaders);
+    }
+
     return jsonResponse({ success: false, message: 'Not Found' }, 404, corsHeaders);
 }
 
@@ -175,7 +181,7 @@ async function deleteSite(id, env, corsHeaders) {
     return jsonResponse({ success: true, message: '站点删除成功' }, 200, corsHeaders);
 }
 
-// ==================== 分类操作 ====================
+// ================== 分类操作 ====================
 
 // 获取所有分类
 async function getCategories(env, corsHeaders) {
@@ -263,7 +269,7 @@ async function deleteCategory(id, env, corsHeaders) {
     return jsonResponse({ success: true, message: '分类删除成功' }, 200, corsHeaders);
 }
 
-// ==================== 文件上传 ====================
+// ==================== 文件上传（KV）====================
 
 async function uploadFile(request, env, corsHeaders) {
     try {
@@ -275,37 +281,67 @@ async function uploadFile(request, env, corsHeaders) {
         }
 
         // 检查文件类型
-        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/svg+xml', 'image/webp'];
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/svg+xml', 'image/webp', 'image/x-icon'];
         if (!allowedTypes.includes(file.type)) {
             return jsonResponse({ success: false, message: '只支持图片文件' }, 400, corsHeaders);
         }
 
-        // 检查文件大小（5MB）
-        if (file.size > 5 * 1024 * 1024) {
-            return jsonResponse({ success: false, message: '文件大小不能超过 5MB' }, 400, corsHeaders);
+        // 检查文件大小（限制 2MB）
+        if (file.size > 2 * 1024 * 1024) {
+            return jsonResponse({ success: false, message: '文件大小不能超过 2MB' }, 400, corsHeaders);
         }
 
         // 生成唯一文件名
         const ext = file.name.split('.').pop();
         const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
 
-        // 上传到 R2
-        await env.BUCKET.put(filename, file.stream(), {
-            httpMetadata: {
-                contentType: file.type,
-            },
-        });
+        // 读取文件为 ArrayBuffer
+        const arrayBuffer = await file.arrayBuffer();
 
-        // 返回公共 URL
-        const fileUrl = `https://pub-${env.R2_PUBLIC_ID}.r2.dev/${filename}`;
+        // 转换为 base64
+        const base64Data = arrayBufferToBase64(arrayBuffer);
+
+        // 保存到 KV
+        await env.KV.put(`image:${filename}`, base64Data, {
+            metadata: {
+                contentType: file.type,
+                originalName: file.name,
+                size: file.size,
+                uploadTime: new Date().toISOString()
+            }
+        });
 
         return jsonResponse({
             success: true,
             message: '上传成功',
-            data: { url: fileUrl }
+            data: { url: `/api/images/${filename}` }
         }, 200, corsHeaders);
     } catch (error) {
         return jsonResponse({ success: false, message: error.message }, 500, corsHeaders);
+    }
+}
+
+// 获取图片
+async function getImage(filename, env, corsHeaders) {
+    try {
+        const { value, metadata } = await env.KV.getWithMetadata(`image:${filename}`);
+
+        if (!value) {
+            return new Response('Image not found', { status: 404 });
+        }
+
+        // 将 base64 转回 ArrayBuffer
+        const arrayBuffer = base64ToArrayBuffer(value);
+
+        return new Response(arrayBuffer, {
+            headers: {
+                'Content-Type': metadata?.contentType || 'image/png',
+                'Cache-Control': 'public, max-age=31536000',
+                ...corsHeaders
+            }
+        });
+    } catch (error) {
+        return new Response('Error loading image', { status: 500 });
     }
 }
 
@@ -319,4 +355,24 @@ function jsonResponse(data, status = 200, headers = {}) {
             ...headers,
         },
     });
+}
+
+// ArrayBuffer 转 Base64
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
+
+// Base64 转 ArrayBuffer
+function base64ToArrayBuffer(base64) {
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
 }

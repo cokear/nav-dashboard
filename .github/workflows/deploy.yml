@@ -11,8 +11,7 @@ env:
   PROJECT_NAME: nav-dashboard
   D1_DATABASE_NAME: nav-dashboard-db
   D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
-  R2_BUCKET_NAME: nav-dashboard-images
-  R2_PUBLIC_ID: ${{ secrets.R2_PUBLIC_ID }}
+  KV_NAMESPACE_ID: cb261e73c6414283a804222054699019
 
 jobs:
   deploy:
