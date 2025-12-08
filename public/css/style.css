@@ -67,9 +67,9 @@ body {
 
 /* ==================== 容器 ==================== */
 .container {
-  max-width: 1600px;
+  max-width: 1800px;
   margin: 0 auto;
-  padding: var(--spacing-md) var(--spacing-sm);
+  padding: var(--spacing-sm) 0.5rem;
   gap: var(--spacing-sm);
 }
 
@@ -267,10 +267,10 @@ body {
 
 /* 左侧分类侧边栏 */
 .sidebar {
-  width: 180px;
+  width: 200px;
   flex-shrink: 0;
   border-radius: var(--radius-lg);
-  padding: var(--spacing-md) var(--spacing-sm);
+  padding: var(--spacing-lg) var(--spacing-md);
   position: sticky;
   top: var(--spacing-md);
   max-height: calc(100vh - 200px);
@@ -288,7 +288,7 @@ body {
 .categories-sidebar {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
 }
 
 .categories-sidebar .category-tab {
@@ -340,18 +340,18 @@ body {
   .layout-wrapper {
     flex-direction: column;
   }
-  
+
   .sidebar {
     width: 100%;
     max-height: none;
     position: static;
   }
-  
+
   .categories-sidebar {
     flex-direction: row;
     flex-wrap: wrap;
   }
-  
+
   .categories-sidebar .category-tab {
     flex: 0 0 auto;
   }
