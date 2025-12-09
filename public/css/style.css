@@ -889,10 +889,7 @@ body {
 .ip-greeting {
   font-size: 1rem;
   font-weight: 600;
-  background: linear-gradient(135deg, #a78bfa, #e879f9);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #1e293b;
 }
 
 .ip-stats {
@@ -967,3 +964,4 @@ body {
   color: var(--text-muted);
   font-size: 0.75rem;
 }
+
