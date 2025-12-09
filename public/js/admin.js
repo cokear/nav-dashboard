@@ -7,6 +7,7 @@ let categories = [];
 let currentTab = 'sites';
 let editingSiteId = null;
 let editingCategoryId = null;
+let currentCategoryFilter = 'all';  // 当前分类筛选
 
 // DOM 加载完成后初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -105,12 +106,20 @@ async function loadSites() {
 function renderSitesTable() {
     const tbody = document.getElementById('sitesTableBody');
 
-    if (sites.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">暂无站点数据</td></tr>';
+    // 根据当前筛选条件过滤站点
+    let filteredSites = sites;
+    if (currentCategoryFilter !== 'all') {
+        const categoryId = parseInt(currentCategoryFilter);
+        filteredSites = sites.filter(site => site.category_id === categoryId);
+    }
+
+    if (filteredSites.length === 0) {
+        const msg = currentCategoryFilter === 'all' ? '暂无站点数据' : '该分类下暂无站点';
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem;">${msg}</td></tr>`;
         return;
     }
 
-    tbody.innerHTML = sites.map(site => `
+    tbody.innerHTML = filteredSites.map(site => `
     <tr data-id="${site.id}">
       <td class="drag-handle" style="cursor: grab; padding: 0.5rem; color: rgba(255,255,255,0.6); font-size: 1.2rem; text-align: center;">⋮⋮</td>
       <td>
@@ -304,11 +313,30 @@ async function loadCategories() {
         if (result.success) {
             categories = result.data;
             renderCategoriesTable();
+            populateCategoryFilter();  // 更新筛选器选项
         }
     } catch (error) {
         console.error('加载分类失败:', error);
         showNotification('加载分类失败', 'error');
     }
+}
+
+// 填充分类筛选器
+function populateCategoryFilter() {
+    const select = document.getElementById('siteCategoryFilter');
+    if (!select) return;
+
+    const currentValue = select.value;
+    select.innerHTML = '<option value="all">📁 全部分类</option>' +
+        categories.map(cat => `<option value="${cat.id}">${cat.icon || '📁'} ${cat.name}</option>`).join('');
+    select.value = currentValue;
+}
+
+// 按分类筛选站点
+function filterSitesByCategory() {
+    const select = document.getElementById('siteCategoryFilter');
+    currentCategoryFilter = select.value;
+    renderSitesTable();
 }
 
 // 渲染分类表格

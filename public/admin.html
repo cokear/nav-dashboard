@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -198,10 +198,16 @@
                 <div id="sitesPanel" class="content-panel active">
                     <div class="panel-header">
                         <h2>🌐 站点管理</h2>
-                        <button class="btn-primary" onclick="openSiteModal()">
-                            <span>➕</span>
-                            <span>添加站点</span>
-                        </button>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <select id="siteCategoryFilter" class="form-input" style="width: auto; min-width: 150px;"
+                                onchange="filterSitesByCategory()">
+                                <option value="all">📁 全部分类</option>
+                            </select>
+                            <button class="btn-primary" onclick="openSiteModal()">
+                                <span>➕</span>
+                                <span>添加站点</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="table-container glass-effect">
