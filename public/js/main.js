@@ -69,15 +69,15 @@ function renderCategories(categories) {
     const container = document.getElementById('categoriesList');
     container.innerHTML = '';
 
-    // 添加"全部"标签
-    const allTab = createCategoryTab('all', '全部', '#a78bfa', true, '📚');
-    container.appendChild(allTab);
-
-    // 添加其他分类
+    // 先添加其他分类
     categories.forEach(category => {
         const tab = createCategoryTab(category.id, category.name, category.color, false, category.icon);
         container.appendChild(tab);
     });
+
+    // 最后添加"全部"标签（放在底部）
+    const allTab = createCategoryTab('all', '全部', '#a78bfa', true, '📚');
+    container.appendChild(allTab);
 
     // 默认加载全部站点
     loadSites('all');
