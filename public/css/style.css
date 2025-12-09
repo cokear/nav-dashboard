@@ -1071,3 +1071,55 @@ body {
     height: 36px;
   }
 }
+
+/* 暗色模式 - 侧边栏 */
+.dark-mode .sidebar,
+.dark-mode .category-tab {
+  background: rgba(30, 41, 59, 0.6);
+  color: #e2e8f0;
+}
+
+.dark-mode .category-tab:hover {
+  background: rgba(51, 65, 85, 0.7);
+}
+
+.dark-mode .category-tab.active {
+  background: rgba(51, 65, 85, 0.8);
+  box-shadow: 0 0 0 2px rgba(100, 180, 255, 0.5);
+}
+
+/* 暗色模式 - 站点卡片 */
+.dark-mode .site-card {
+  background: rgba(30, 41, 59, 0.7);
+  color: #e2e8f0;
+}
+
+.dark-mode .site-card:hover {
+  background: rgba(51, 65, 85, 0.8);
+}
+
+/* 暗色模式 - 骨架屏 */
+.dark-mode .skeleton-card {
+  background: rgba(30, 41, 59, 0.6);
+}
+
+.dark-mode .skeleton-logo,
+.dark-mode .skeleton-text {
+  background: linear-gradient(90deg, rgba(51, 65, 85, 0.5) 25%, rgba(71, 85, 105, 0.7) 50%, rgba(51, 65, 85, 0.5) 75%);
+  background-size: 200% 100%;
+}
+
+/* 暗色模式 - 搜索框 */
+.dark-mode .search-box-center {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(71, 85, 105, 0.5);
+}
+
+.dark-mode .search-input,
+.dark-mode .search-label {
+  color: #e2e8f0;
+}
+
+.dark-mode .engine-btn.active {
+  background: rgba(51, 65, 85, 0.7);
+}
