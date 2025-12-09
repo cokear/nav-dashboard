@@ -1126,3 +1126,19 @@ body {
   background: rgba(51, 65, 85, 0.7);
 }
 
+
+/* 暗色模式 - 修复所有分类按钮 */
+.dark-mode .categories-sidebar .category-tab {
+  background: rgba(30, 41, 59, 0.7) !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(71, 85, 105, 0.5);
+}
+
+.dark-mode .categories-sidebar .category-tab:hover {
+  background: rgba(51, 65, 85, 0.8) !important;
+}
+
+.dark-mode .categories-sidebar .category-tab.active {
+  background: rgba(51, 65, 85, 0.9) !important;
+  box-shadow: 0 0 0 2px rgba(100, 180, 255, 0.5);
+}
