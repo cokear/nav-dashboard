@@ -152,8 +152,10 @@ function createSiteCard(site) {
 function setupSearch() {
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
-    const searchEngine = document.getElementById('searchEngine');
     const suggestions = document.getElementById('searchSuggestions');
+    const engineBtns = document.querySelectorAll('.engine-btn');
+
+    let currentEngine = 'google';
 
     const engines = {
         google: 'https://www.google.com/search?q=',
@@ -162,12 +164,21 @@ function setupSearch() {
         duckduckgo: 'https://duckduckgo.com/?q='
     };
 
+    // 搜索引擎按钮切换
+    engineBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            engineBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentEngine = btn.dataset.engine;
+            searchInput.focus();
+        });
+    });
+
     // 外部搜索
     function doSearch() {
         const query = searchInput.value.trim();
         if (query) {
-            const engine = searchEngine.value;
-            window.open(engines[engine] + encodeURIComponent(query), '_blank');
+            window.open(engines[currentEngine] + encodeURIComponent(query), '_blank');
             hideSuggestions();
         }
     }
@@ -204,7 +215,7 @@ function setupSearch() {
                     `;
                     suggestions.classList.add('active');
                 } else {
-                    suggestions.innerHTML = `<div class="suggestion-empty">无匹配站点，按 Enter 使用 ${searchEngine.value} 搜索</div>`;
+                    suggestions.innerHTML = `<div class="suggestion-empty">无匹配站点，按 Enter 搜索</div>`;
                     suggestions.classList.add('active');
                 }
             }

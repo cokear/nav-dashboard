@@ -15,13 +15,18 @@
     <!-- 顶栏：搜索引擎 -->
     <header class="header-simple">
       <div class="search-box-center glass-effect">
-        <select id="searchEngine" class="search-engine-select">
-          <option value="google">Google</option>
-          <option value="bing">Bing</option>
-          <option value="github">GitHub</option>
-          <option value="duckduckgo">DuckDuckGo</option>
-        </select>
-        <div class="search-input-wrapper"><input type="text" id="searchInput" class="search-input" placeholder="搜索站点或使用搜索引擎..." autocomplete="off"><div id="searchSuggestions" class="search-suggestions"></div></div>
+        <div class="search-engines">
+          <button type="button" class="engine-btn active" data-engine="google" title="Google">
+            <img src="https://www.google.com/favicon.ico" alt="Google">
+          </button>
+          <button type="button" class="engine-btn" data-engine="bing" title="Bing">
+            <img src="https://www.bing.com/favicon.ico" alt="Bing">
+          </button>
+          <button type="button" class="engine-btn" data-engine="github" title="GitHub">
+            <img src="https://github.com/favicon.ico" alt="GitHub">
+          </button>
+        </div>
+        <div class="search-input-wrapper"><input type="text" id="searchInput" class="search-input" placeholder=" " autocomplete="off"><label for="searchInput" class="search-label">搜索站点...</label><div id="searchSuggestions" class="search-suggestions"></div></div>
         <button id="searchBtn" class="search-btn">🔍</button>
       </div>
       <a href="/admin.html" class="admin-link" title="管理">⚙️</a>
@@ -92,3 +97,4 @@
 </body>
 
 </html>
+
