@@ -1175,9 +1175,10 @@ body {
 .logo-placeholder {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #e879f9 0%, #a78bfa 100%);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
   border-radius: var(--radius-sm);
-  opacity: 0.3;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1209,8 +1210,8 @@ body {
 
 /* 暗色模式适配 */
 .dark-mode .logo-placeholder {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  opacity: 0.4;
+  background: rgba(30, 41, 59, 0.5);
+  border-color: rgba(71, 85, 105, 0.4);
 }
 
 /* ==================== 站点卡片入场动画 ==================== */
