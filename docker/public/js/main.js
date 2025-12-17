@@ -533,11 +533,29 @@ function getVisitCount() {
     return count;
 }
 
-// 获取天气信息
-async function loadWeather() {
+// 带超时的 fetch
+async function fetchWithTimeout(url, timeout = 5000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
     try {
-        // 使用免费天气API（基于IP定位）
-        const response = await fetch('https://wttr.in/?format=j1');
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        return response;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+    }
+}
+
+// 获取天气信息（使用坐标）
+async function loadWeather(lat, lon) {
+    try {
+        // 使用坐标查询天气，更快更准确
+        const url = lat && lon
+            ? `https://wttr.in/${lat},${lon}?format=j1`
+            : 'https://wttr.in/?format=j1';
+
+        const response = await fetchWithTimeout(url, 5000);
         const data = await response.json();
 
         const current = data.current_condition[0];
@@ -567,16 +585,19 @@ async function loadWeather() {
         document.getElementById('weatherTemp').textContent = `${temp}°C`;
         document.getElementById('weatherDesc').textContent = desc;
     } catch (error) {
-        document.getElementById('weatherDesc').textContent = '天气获取失败';
+        // 超时或失败时隐藏天气区域
+        const weatherEl = document.getElementById('ipWeather');
+        if (weatherEl) weatherEl.style.display = 'none';
     }
 }
 
 async function loadIpInfo() {
     try {
-        const response = await fetch(`${API_BASE}/api/ip`);
+        // 使用 ip-api.com 一次性获取 IP + 位置信息（更快）
+        const response = await fetchWithTimeout('http://ip-api.com/json/?lang=zh-CN', 5000);
         const data = await response.json();
 
-        if (data.ip) {
+        if (data.status === 'success') {
             // 设置问候语
             document.getElementById('ipGreeting').textContent = getGreeting();
 
@@ -585,8 +606,14 @@ async function loadIpInfo() {
             document.getElementById('visitCount').textContent = `第 ${visitCount} 次访问`;
 
             // 设置IP信息
-            document.getElementById('ipAddress').textContent = data.ip;
-            document.getElementById('ipLocation').textContent = data.location || '未知位置';
+            document.getElementById('ipAddress').textContent = data.query || 'Unknown';
+
+            // 组合位置信息：城市 + 地区
+            const location = [data.city, data.regionName, data.country]
+                .filter(Boolean)
+                .slice(0, 2)
+                .join(', ') || '未知位置';
+            document.getElementById('ipLocation').textContent = location;
 
             const card = document.getElementById('ipCard');
             card.style.display = 'block';
@@ -596,17 +623,38 @@ async function loadIpInfo() {
                 card.classList.add('show');
             }, 100);
 
-            // 加载天气
-            loadWeather();
+            // 使用坐标加载天气（更快更准确）
+            loadWeather(data.lat, data.lon);
 
             // 15秒后自动关闭
             setTimeout(() => {
                 closeIpCard();
             }, 15000);
+        } else {
+            // 降级：只显示基本信息
+            showFallbackIpCard();
         }
     } catch (error) {
         console.error('加载IP信息失败:', error);
+        // 降级处理
+        showFallbackIpCard();
     }
+}
+
+// 降级显示（当 API 不可用时）
+function showFallbackIpCard() {
+    document.getElementById('ipGreeting').textContent = getGreeting();
+    document.getElementById('visitCount').textContent = `第 ${getVisitCount()} 次访问`;
+    document.getElementById('ipAddress').textContent = '本地网络';
+    document.getElementById('ipLocation').textContent = '私有网络';
+
+    const weatherEl = document.getElementById('ipWeather');
+    if (weatherEl) weatherEl.style.display = 'none';
+
+    const card = document.getElementById('ipCard');
+    card.style.display = 'block';
+    setTimeout(() => card.classList.add('show'), 100);
+    setTimeout(() => closeIpCard(), 10000);
 }
 
 function closeIpCard() {
