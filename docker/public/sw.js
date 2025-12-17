@@ -42,6 +42,11 @@ self.addEventListener('fetch', event => {
         return;
     }
 
+    // 只缓存 GET 请求，跳过 POST/PUT/DELETE 等
+    if (request.method !== 'GET') {
+        return;
+    }
+
     // 图片代理请求：Cache First（优先本地缓存）
     if (url.pathname === '/api/proxy/image') {
         event.respondWith(
