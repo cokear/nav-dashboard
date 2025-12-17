@@ -630,56 +630,89 @@ let allSitesData = []; // 存储所有站点数据用于排序
 
 // 初始化编辑模式
 function initEditMode() {
-    const editToggle = document.getElementById('editModeToggle');
+    const gearMenuBtn = document.getElementById('gearMenuBtn');
+    const gearMenu = document.getElementById('gearMenu');
+    const editModeBtn = document.getElementById('editModeBtn');
     const passwordModal = document.getElementById('passwordModal');
     const passwordInput = document.getElementById('editPassword');
     const confirmBtn = document.getElementById('passwordConfirmBtn');
     const cancelBtn = document.getElementById('passwordCancelBtn');
     const passwordError = document.getElementById('passwordError');
 
-    if (!editToggle) return;
+    if (!gearMenuBtn || !gearMenu) return;
 
-    // 检查是否已解锁（sessionStorage）
-    if (sessionStorage.getItem('editModeUnlocked') === 'true') {
-        enableEditMode();
+    // 齿轮菜单显示/隐藏
+    gearMenuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isVisible = gearMenu.style.display === 'block';
+        gearMenu.style.display = isVisible ? 'none' : 'block';
+    });
+
+    // 点击其他地方关闭菜单
+    document.addEventListener('click', (e) => {
+        if (!gearMenu.contains(e.target) && e.target !== gearMenuBtn) {
+            gearMenu.style.display = 'none';
+        }
+    });
+
+    // 编辑排序按钮
+    if (editModeBtn) {
+        // 检查是否已解锁，更新按钮状态
+        if (sessionStorage.getItem('editModeUnlocked') === 'true') {
+            editModeBtn.classList.add('active');
+            editModeBtn.querySelector('span:last-child').textContent = '退出编辑';
+        }
+
+        editModeBtn.addEventListener('click', () => {
+            gearMenu.style.display = 'none'; // 关闭菜单
+
+            if (isEditMode) {
+                disableEditMode();
+                editModeBtn.classList.remove('active');
+                editModeBtn.querySelector('span:last-child').textContent = '编辑排序';
+            } else {
+                // 检查是否已解锁
+                if (sessionStorage.getItem('editModeUnlocked') === 'true') {
+                    enableEditMode();
+                    editModeBtn.classList.add('active');
+                    editModeBtn.querySelector('span:last-child').textContent = '退出编辑';
+                } else {
+                    passwordModal.style.display = 'flex';
+                    passwordInput.focus();
+                    passwordError.textContent = '';
+                }
+            }
+        });
     }
 
-    // 点击编辑按钮
-    editToggle.addEventListener('click', () => {
-        if (isEditMode) {
-            disableEditMode();
-        } else {
-            // 检查是否已解锁
-            if (sessionStorage.getItem('editModeUnlocked') === 'true') {
-                enableEditMode();
-            } else {
-                passwordModal.style.display = 'flex';
-                passwordInput.focus();
-                passwordError.textContent = '';
-            }
-        }
-    });
-
     // 确认密码
-    confirmBtn.addEventListener('click', verifyEditPassword);
-    passwordInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') verifyEditPassword();
-    });
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', verifyEditPassword);
+    }
+    if (passwordInput) {
+        passwordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') verifyEditPassword();
+        });
+    }
 
     // 取消
-    cancelBtn.addEventListener('click', () => {
-        passwordModal.style.display = 'none';
-        passwordInput.value = '';
-        passwordError.textContent = '';
-    });
-
-    // 点击遮罩关闭
-    passwordModal.addEventListener('click', (e) => {
-        if (e.target === passwordModal) {
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
             passwordModal.style.display = 'none';
             passwordInput.value = '';
-        }
-    });
+            passwordError.textContent = '';
+        });
+    }
+
+    // 点击遮罩关闭
+    if (passwordModal) {
+        passwordModal.addEventListener('click', (e) => {
+            if (e.target === passwordModal) {
+                passwordModal.style.display = 'none';
+                passwordInput.value = '';
+            }
+        });
+    }
 }
 
 // 验证密码
@@ -687,6 +720,7 @@ async function verifyEditPassword() {
     const passwordInput = document.getElementById('editPassword');
     const passwordError = document.getElementById('passwordError');
     const passwordModal = document.getElementById('passwordModal');
+    const editModeBtn = document.getElementById('editModeBtn');
 
     try {
         const response = await fetch(`${API_BASE}/api/auth/verify`, {
@@ -702,6 +736,10 @@ async function verifyEditPassword() {
             passwordModal.style.display = 'none';
             passwordInput.value = '';
             enableEditMode();
+            if (editModeBtn) {
+                editModeBtn.classList.add('active');
+                editModeBtn.querySelector('span:last-child').textContent = '退出编辑';
+            }
         } else {
             passwordError.textContent = result.error || '密码错误';
             passwordInput.select();
@@ -715,9 +753,6 @@ async function verifyEditPassword() {
 function enableEditMode() {
     isEditMode = true;
     document.body.classList.add('edit-mode');
-    document.getElementById('editModeToggle').textContent = '🔓';
-    document.getElementById('editModeToggle').classList.add('active');
-    document.getElementById('editModeToggle').title = '点击退出编辑模式';
 
     // 为所有站点卡片添加拖拽事件
     setupDragAndDrop();
@@ -727,9 +762,6 @@ function enableEditMode() {
 function disableEditMode() {
     isEditMode = false;
     document.body.classList.remove('edit-mode');
-    document.getElementById('editModeToggle').textContent = '🔒';
-    document.getElementById('editModeToggle').classList.remove('active');
-    document.getElementById('editModeToggle').title = '编辑排序';
 
     // 移除拖拽事件
     removeDragAndDrop();

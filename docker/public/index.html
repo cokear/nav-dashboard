@@ -6,14 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>导航站</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="stylesheet" href="/css/style.css?v=10">
+  <link rel="stylesheet" href="/css/style.css?v=11">
 </head>
 
 <body>
   <!-- 暗色模式切换 -->
   <button id="themeToggle" class="theme-toggle" title="切换主题">🌙</button>
-  <!-- 编辑模式切换 -->
-  <button id="editModeToggle" class="edit-mode-toggle" title="编辑排序">🔒</button>
 
   <!-- 密码验证弹窗 -->
   <div id="passwordModal" class="password-modal" style="display: none;">
@@ -52,7 +50,20 @@
         </div>
         <button id="searchBtn" class="search-btn">🔍</button>
       </div>
-      <a href="/admin.html" class="admin-link" title="管理">⚙️</a>
+      <!-- 齿轮菜单 -->
+      <div class="gear-menu-wrapper">
+        <button id="gearMenuBtn" class="gear-btn" title="菜单">⚙️</button>
+        <div id="gearMenu" class="gear-dropdown" style="display: none;">
+          <button id="editModeBtn" class="gear-menu-item">
+            <span class="gear-menu-icon">🔐</span>
+            <span>编辑排序</span>
+          </button>
+          <a href="/admin.html" class="gear-menu-item">
+            <span class="gear-menu-icon">⚙️</span>
+            <span>管理后台</span>
+          </a>
+        </div>
+      </div>
     </header>
 
     <!-- 主布局 -->
@@ -124,7 +135,7 @@
     </div>
   </div>
 
-  <script src="/js/main.js?v=3"></script>
+  <script src="/js/main.js?v=4"></script>
 </body>
 
 </html>
