@@ -34,3 +34,7 @@ Thumbs.db
 *.tmp
 *.log
 .git/
+
+# Docker data and uploads
+docker/data/
+docker/uploads/

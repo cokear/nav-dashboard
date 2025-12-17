@@ -98,15 +98,22 @@ async function cacheRemoteImage(imageUrl) {
 // 尝试下载单个图片
 async function tryDownloadImage(imageUrl) {
     try {
+        // 确保上传目录存在
+        if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+
         // 使用 URL 的 MD5 哈希作为文件名，避免重复下载
         const urlHash = crypto.createHash('md5').update(imageUrl).digest('hex');
 
         // 检查是否已存在该哈希的文件（忽略扩展名）
-        const existingFiles = fs.readdirSync(uploadsDir);
-        const existingFile = existingFiles.find(f => f.startsWith(urlHash));
-        if (existingFile) {
-            console.log(`图片已存在(跳过下载): ${imageUrl} -> /api/images/${existingFile}`);
-            return `/api/images/${existingFile}`;
+        if (fs.existsSync(uploadsDir)) {
+            const existingFiles = fs.readdirSync(uploadsDir);
+            const existingFile = existingFiles.find(f => f.startsWith(urlHash));
+            if (existingFile) {
+                console.log(`图片已存在(跳过下载): ${imageUrl} -> /api/images/${existingFile}`);
+                return `/api/images/${existingFile}`;
+            }
         }
 
         const controller = new AbortController();
@@ -266,30 +273,66 @@ app.post('/api/sites/reorder', (req, res) => {
 // --- 批量缓存所有站点图标 ---
 app.post('/api/sites/cache-logos', async (req, res) => {
     try {
-        const sites = db.prepare(`SELECT id, logo FROM sites WHERE logo IS NOT NULL AND logo != '' AND logo NOT LIKE '/api/images/%'`).all();
-
-        if (sites.length === 0) {
-            return res.json({ success: true, message: '没有需要缓存的外部图标', cached: 0 });
-        }
+        // 获取所有站点，包括已经是本地图标的（因为可能文件丢失）
+        const sites = db.prepare(`SELECT id, name, url, logo FROM sites WHERE logo IS NOT NULL AND logo != ''`).all();
 
         let cached = 0;
         let failed = 0;
+        let fixed = 0; // 修复的数量
         const updateStmt = db.prepare('UPDATE sites SET logo = ? WHERE id = ?');
 
         for (const site of sites) {
-            const cachedLogo = await cacheRemoteImage(site.logo);
-            if (cachedLogo !== site.logo) {
-                updateStmt.run(cachedLogo, site.id);
-                cached++;
-            } else {
-                failed++;
+            let newLogo = site.logo;
+            let needsUpdate = false;
+
+            // 情况1: 已经是本地路径，检查文件是否存在
+            if (site.logo && site.logo.startsWith('/api/images/')) {
+                const filename = site.logo.replace('/api/images/', '');
+                const filePath = path.join(uploadsDir, filename);
+
+                // 如果文件不存在，尝试修复
+                if (!fs.existsSync(filePath)) {
+                    console.log(`发现丢失的图标: ${site.name} (${site.logo})，尝试重新获取...`);
+                    // 文件丢失，尝试从站点 URL 重新获取
+                    try {
+                        const domain = new URL(site.url).hostname;
+                        const fallbackUrl = `https://www.google.com/s2/favicons?sz=128&domain=${domain}`;
+                        const result = await tryDownloadImage(fallbackUrl);
+                        if (result) {
+                            newLogo = result;
+                            needsUpdate = true;
+                            fixed++;
+                        } else {
+                            failed++;
+                        }
+                    } catch (e) {
+                        console.error(`修复图标失败 [${site.name}]:`, e.message);
+                        failed++;
+                    }
+                }
+            }
+            // 情况2: 远程 URL，尝试缓存
+            else if (site.logo && !site.logo.startsWith('/api/images/')) {
+                const result = await cacheRemoteImage(site.logo);
+                if (result && result !== site.logo) {
+                    newLogo = result;
+                    needsUpdate = true;
+                    cached++;
+                } else if (!result) { // 下载失败
+                    failed++;
+                }
+            }
+
+            if (needsUpdate) {
+                updateStmt.run(newLogo, site.id);
             }
         }
 
         res.json({
             success: true,
-            message: `图标缓存完成: ${cached} 个成功, ${failed} 个失败`,
+            message: `图标处理完成: 缓存 ${cached} 个, 修复 ${fixed} 个, 失败 ${failed} 个`,
             cached,
+            fixed,
             failed,
             total: sites.length
         });
