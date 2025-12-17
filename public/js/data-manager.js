@@ -46,7 +46,7 @@ function injectDataManagement() {
                         </button>
                     </div>
                     <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 2rem 0;">
-                    <div class="form-group">
+                    <div class="form-group" style="margin-bottom: 2rem;">
                         <h3 style="margin-bottom: 1rem; color: white;">📥 导入数据</h3>
                         <p style="color: rgba(255,255,255,0.7); margin-bottom: 1rem;">
                             从备份文件导入数据。<strong style="color: #ff6b6b;">警告：将覆盖现有数据！</strong>
@@ -56,6 +56,17 @@ function injectDataManagement() {
                             <span>⬆️ 选择备份文件</span>
                         </button>
                         <div id="importMsg" class="password-msg" style="margin-top: 1rem;"></div>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 2rem 0;">
+                    <div class="form-group">
+                        <h3 style="margin-bottom: 1rem; color: white;">🖼️ 图标缓存</h3>
+                        <p style="color: rgba(255,255,255,0.7); margin-bottom: 1rem;">
+                            将所有外部图标下载并缓存到服务器本地，避免外部图片失效。
+                        </p>
+                        <button class="btn-primary" onclick="cacheAllLogos()" id="cacheLogosBtn">
+                            <span>📥 缓存所有图标</span>
+                        </button>
+                        <div id="cacheMsg" class="password-msg" style="margin-top: 1rem;"></div>
                     </div>
                 </div>
             </div>
@@ -124,4 +135,45 @@ async function handleImport(event) {
     }
 
     event.target.value = '';
+}
+
+// 缓存所有图标
+async function cacheAllLogos() {
+    const msgEl = document.getElementById('cacheMsg');
+    const btn = document.getElementById('cacheLogosBtn');
+
+    if (!confirm('确定要缓存所有外部图标吗？这可能需要一些时间。')) {
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳ 缓存中...</span>';
+    msgEl.textContent = '正在缓存外部图标，请稍候...';
+    msgEl.className = 'password-msg';
+
+    try {
+        const response = await fetch('/api/sites/cache-logos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            msgEl.textContent = result.message;
+            msgEl.className = 'password-msg success';
+            if (result.cached > 0) {
+                setTimeout(() => location.reload(), 2000);
+            }
+        } else {
+            msgEl.textContent = result.message || '缓存失败';
+            msgEl.className = 'password-msg error';
+        }
+    } catch (error) {
+        msgEl.textContent = '请求失败: ' + error.message;
+        msgEl.className = 'password-msg error';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<span>📥 缓存所有图标</span>';
 }

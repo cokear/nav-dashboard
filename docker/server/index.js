@@ -33,6 +33,68 @@ const upload = multer({
     }
 });
 
+// 缓存远程图片到本地
+async function cacheRemoteImage(imageUrl) {
+    // 如果已经是本地路径，直接返回
+    if (!imageUrl || imageUrl.startsWith('/api/images/')) {
+        return imageUrl;
+    }
+
+    // 验证 URL
+    try {
+        new URL(imageUrl);
+    } catch {
+        return imageUrl;
+    }
+
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
+
+        const response = await fetch(imageUrl, {
+            signal: controller.signal,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (compatible; NavDashboard/1.0)',
+                'Accept': 'image/*'
+            }
+        });
+        clearTimeout(timeout);
+
+        if (!response.ok) {
+            console.log(`图片下载失败: ${imageUrl} - ${response.status}`);
+            return imageUrl;
+        }
+
+        const contentType = response.headers.get('Content-Type') || '';
+        if (!contentType.startsWith('image/')) {
+            return imageUrl;
+        }
+
+        // 根据 Content-Type 确定文件扩展名
+        const extMap = {
+            'image/jpeg': '.jpg',
+            'image/png': '.png',
+            'image/gif': '.gif',
+            'image/svg+xml': '.svg',
+            'image/webp': '.webp',
+            'image/x-icon': '.ico',
+            'image/vnd.microsoft.icon': '.ico'
+        };
+        const ext = extMap[contentType] || '.png';
+        const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}${ext}`;
+        const filePath = path.join(uploadsDir, filename);
+
+        const buffer = Buffer.from(await response.arrayBuffer());
+        fs.writeFileSync(filePath, buffer);
+
+        console.log(`图片已缓存: ${imageUrl} -> /api/images/${filename}`);
+        return `/api/images/${filename}`;
+    } catch (error) {
+        console.log(`图片缓存失败: ${imageUrl} - ${error.message}`);
+        return imageUrl;
+    }
+}
+
 // 中间件
 app.use(cors());
 app.use(express.json());
@@ -79,23 +141,31 @@ app.get('/api/sites', (req, res) => {
     });
 });
 
-app.post('/api/sites', (req, res) => {
+app.post('/api/sites', async (req, res) => {
     const { name, url, description, logo, category_id, sort_order } = req.body;
     if (!name || !url) {
         return res.status(400).json({ success: false, message: '站点名称和URL为必填项' });
     }
+
+    // 缓存远程 logo 到本地
+    const cachedLogo = await cacheRemoteImage(logo);
+
     const stmt = db.prepare(`INSERT INTO sites (name, url, description, logo, category_id, sort_order) VALUES (?, ?, ?, ?, ?, ?)`);
-    const result = stmt.run(name, url, description || '', logo || '', category_id || null, sort_order || 0);
+    const result = stmt.run(name, url, description || '', cachedLogo || '', category_id || null, sort_order || 0);
     res.json({ success: true, message: '站点创建成功', data: { id: result.lastInsertRowid } });
 });
 
-app.put('/api/sites/:id', (req, res) => {
+app.put('/api/sites/:id', async (req, res) => {
     const { name, url, description, logo, category_id, sort_order } = req.body;
     if (!name || !url) {
         return res.status(400).json({ success: false, message: '站点名称和URL为必填项' });
     }
+
+    // 缓存远程 logo 到本地
+    const cachedLogo = await cacheRemoteImage(logo);
+
     const stmt = db.prepare(`UPDATE sites SET name=?, url=?, description=?, logo=?, category_id=?, sort_order=?, updated_at=CURRENT_TIMESTAMP WHERE id=?`);
-    const result = stmt.run(name, url, description || '', logo || '', category_id || null, sort_order || 0, req.params.id);
+    const result = stmt.run(name, url, description || '', cachedLogo || '', category_id || null, sort_order || 0, req.params.id);
     if (result.changes === 0) {
         return res.status(404).json({ success: false, message: '站点不存在' });
     }
@@ -123,6 +193,41 @@ app.post('/api/sites/reorder', (req, res) => {
     });
     updateMany(order);
     res.json({ success: true, message: '排序更新成功' });
+});
+
+// --- 批量缓存所有站点图标 ---
+app.post('/api/sites/cache-logos', async (req, res) => {
+    try {
+        const sites = db.prepare(`SELECT id, logo FROM sites WHERE logo IS NOT NULL AND logo != '' AND logo NOT LIKE '/api/images/%'`).all();
+
+        if (sites.length === 0) {
+            return res.json({ success: true, message: '没有需要缓存的外部图标', cached: 0 });
+        }
+
+        let cached = 0;
+        let failed = 0;
+        const updateStmt = db.prepare('UPDATE sites SET logo = ? WHERE id = ?');
+
+        for (const site of sites) {
+            const cachedLogo = await cacheRemoteImage(site.logo);
+            if (cachedLogo !== site.logo) {
+                updateStmt.run(cachedLogo, site.id);
+                cached++;
+            } else {
+                failed++;
+            }
+        }
+
+        res.json({
+            success: true,
+            message: `图标缓存完成: ${cached} 个成功, ${failed} 个失败`,
+            cached,
+            failed,
+            total: sites.length
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: '缓存失败: ' + error.message });
+    }
 });
 
 // --- 分类 API ---
