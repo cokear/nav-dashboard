@@ -900,4 +900,256 @@ async function saveNewOrder() {
 // 在初始化时调用
 document.addEventListener('DOMContentLoaded', () => {
     initEditMode();
+    initQuickAdd();
 });
+
+// ==================== 快速添加功能 ====================
+
+// 存储待执行的回调（验证密码后执行）
+let pendingQuickAddAction = null;
+
+function initQuickAdd() {
+    const quickAddBtn = document.getElementById('quickAddBtn');
+    const quickAddModal = document.getElementById('quickAddModal');
+    const quickAddName = document.getElementById('quickAddName');
+    const quickAddUrl = document.getElementById('quickAddUrl');
+    const quickAddLogo = document.getElementById('quickAddLogo');
+    const quickAddFetch1 = document.getElementById('quickAddFetch1');
+    const quickAddFetch2 = document.getElementById('quickAddFetch2');
+    const quickAddLogoPreview = document.getElementById('quickAddLogoPreview');
+    const quickAddCancelBtn = document.getElementById('quickAddCancelBtn');
+    const quickAddConfirmBtn = document.getElementById('quickAddConfirmBtn');
+    const quickAddError = document.getElementById('quickAddError');
+    const gearMenu = document.getElementById('gearMenu');
+    const passwordModal = document.getElementById('passwordModal');
+
+    if (!quickAddBtn || !quickAddModal) return;
+
+    // 点击快速添加按钮
+    quickAddBtn.addEventListener('click', () => {
+        gearMenu.style.display = 'none';
+
+        // 检查是否已验证
+        if (sessionStorage.getItem('editModeUnlocked') === 'true') {
+            openQuickAddModal();
+        } else {
+            // 设置回调，验证成功后打开快速添加弹窗
+            pendingQuickAddAction = openQuickAddModal;
+            passwordModal.style.display = 'flex';
+            document.getElementById('editPassword').focus();
+            document.getElementById('passwordError').textContent = '';
+        }
+    });
+
+    // 打开快速添加弹窗
+    function openQuickAddModal() {
+        quickAddName.value = '';
+        quickAddUrl.value = '';
+        quickAddLogo.value = '';
+        quickAddLogoPreview.innerHTML = '';
+        quickAddError.textContent = '';
+        quickAddModal.style.display = 'flex';
+        quickAddName.focus();
+    }
+
+    // 关闭快速添加弹窗
+    function closeQuickAddModal() {
+        quickAddModal.style.display = 'none';
+    }
+
+    // 获取Logo - Google源
+    quickAddFetch1.addEventListener('click', () => {
+        const url = quickAddUrl.value.trim();
+        if (!url) {
+            quickAddError.textContent = '请先输入网站URL';
+            return;
+        }
+        try {
+            const domain = new URL(url).hostname;
+            const logo = `https://www.google.com/s2/favicons?sz=128&domain=${domain}`;
+            quickAddLogo.value = logo;
+            updateQuickAddPreview(logo);
+            quickAddError.textContent = '';
+        } catch {
+            quickAddError.textContent = 'URL格式无效';
+        }
+    });
+
+    // 获取Logo - toolb.cn源
+    quickAddFetch2.addEventListener('click', () => {
+        const url = quickAddUrl.value.trim();
+        if (!url) {
+            quickAddError.textContent = '请先输入网站URL';
+            return;
+        }
+        try {
+            const domain = new URL(url).hostname;
+            const logo = `https://toolb.cn/favicon/${domain}`;
+            quickAddLogo.value = logo;
+            updateQuickAddPreview(logo);
+            quickAddError.textContent = '';
+        } catch {
+            quickAddError.textContent = 'URL格式无效';
+        }
+    });
+
+    // Logo输入变化时更新预览
+    quickAddLogo.addEventListener('input', (e) => {
+        updateQuickAddPreview(e.target.value);
+    });
+
+    function updateQuickAddPreview(url) {
+        if (url && url.trim()) {
+            quickAddLogoPreview.innerHTML = `<img src="${url}" alt="Logo" onerror="this.style.display='none'">`;
+        } else {
+            quickAddLogoPreview.innerHTML = '';
+        }
+    }
+
+    // 取消按钮
+    quickAddCancelBtn.addEventListener('click', closeQuickAddModal);
+
+    // 点击遮罩关闭
+    quickAddModal.addEventListener('click', (e) => {
+        if (e.target === quickAddModal) {
+            closeQuickAddModal();
+        }
+    });
+
+    // 确认添加
+    quickAddConfirmBtn.addEventListener('click', handleQuickAdd);
+    quickAddName.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') quickAddUrl.focus();
+    });
+    quickAddUrl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleQuickAdd();
+    });
+
+    async function handleQuickAdd() {
+        const name = quickAddName.value.trim();
+        const url = quickAddUrl.value.trim();
+        let logo = quickAddLogo.value.trim();
+
+        if (!name) {
+            quickAddError.textContent = '请输入网站名称';
+            quickAddName.focus();
+            return;
+        }
+        if (!url) {
+            quickAddError.textContent = '请输入网站URL';
+            quickAddUrl.focus();
+            return;
+        }
+
+        // 如果没有logo，自动获取Google Favicon
+        if (!logo) {
+            try {
+                const domain = new URL(url).hostname;
+                logo = `https://www.google.com/s2/favicons?sz=128&domain=${domain}`;
+            } catch {
+                quickAddError.textContent = 'URL格式无效';
+                return;
+            }
+        }
+
+        quickAddConfirmBtn.disabled = true;
+        quickAddConfirmBtn.textContent = '添加中...';
+
+        try {
+            const response = await fetch(`${API_BASE}/api/sites`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    url,
+                    logo,
+                    category_id: currentCategory !== 'all' ? currentCategory : null,
+                    sort_order: 0
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                closeQuickAddModal();
+                // 刷新当前分类列表
+                loadSites(currentCategory, currentSearchTerm);
+                showQuickAddToast('✅ 网站添加成功');
+            } else {
+                quickAddError.textContent = result.message || '添加失败';
+            }
+        } catch (error) {
+            quickAddError.textContent = '网络错误，请重试';
+        } finally {
+            quickAddConfirmBtn.disabled = false;
+            quickAddConfirmBtn.textContent = '添加';
+        }
+    }
+}
+
+// 显示简易Toast提示
+function showQuickAddToast(message) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        z-index: 3000;
+        animation: fadeInUp 0.3s ease;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.animation = 'fadeInUp 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+
+// 修改原有的验证密码函数，支持快速添加回调
+const originalVerifyEditPassword = verifyEditPassword;
+verifyEditPassword = async function () {
+    const passwordInput = document.getElementById('editPassword');
+    const passwordError = document.getElementById('passwordError');
+    const passwordModal = document.getElementById('passwordModal');
+    const editModeBtn = document.getElementById('editModeBtn');
+
+    try {
+        const response = await fetch(`${API_BASE}/api/auth/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: passwordInput.value })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            sessionStorage.setItem('editModeUnlocked', 'true');
+            passwordModal.style.display = 'none';
+            passwordInput.value = '';
+
+            // 如果有待执行的快速添加回调
+            if (pendingQuickAddAction) {
+                pendingQuickAddAction();
+                pendingQuickAddAction = null;
+            } else {
+                enableEditMode();
+                if (editModeBtn) {
+                    editModeBtn.classList.add('active');
+                    editModeBtn.querySelector('span:last-child').textContent = '退出编辑';
+                }
+            }
+        } else {
+            passwordError.textContent = result.error || '密码错误';
+            passwordInput.select();
+        }
+    } catch (error) {
+        passwordError.textContent = '验证失败，请重试';
+    }
+};

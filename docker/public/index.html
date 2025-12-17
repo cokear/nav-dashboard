@@ -29,6 +29,26 @@
 
   <div class="container">
 
+    <!-- 快速添加弹窗 -->
+    <div id="quickAddModal" class="password-modal" style="display: none;">
+      <div class="password-modal-content glass-effect quick-add-modal">
+        <h3>➕ 快速添加网站</h3>
+        <input type="text" id="quickAddName" placeholder="网站名称" autocomplete="off">
+        <input type="url" id="quickAddUrl" placeholder="https://..." autocomplete="off">
+        <div class="quick-add-logo-row">
+          <input type="text" id="quickAddLogo" placeholder="图标URL（可选）" autocomplete="off">
+          <button type="button" id="quickAddFetch1" class="btn-secondary btn-sm" title="Google源">🔍1</button>
+          <button type="button" id="quickAddFetch2" class="btn-secondary btn-sm" title="toolb.cn源">🔍2</button>
+        </div>
+        <div class="quick-add-logo-preview" id="quickAddLogoPreview"></div>
+        <div class="password-modal-btns">
+          <button id="quickAddCancelBtn" class="btn-secondary">取消</button>
+          <button id="quickAddConfirmBtn" class="btn-primary">添加</button>
+        </div>
+        <div id="quickAddError" class="password-error"></div>
+      </div>
+    </div>
+
     <!-- 顶栏：搜索引擎 -->
     <header class="header-simple">
       <div class="search-box-center glass-effect">
@@ -54,6 +74,10 @@
       <div class="gear-menu-wrapper">
         <button id="gearMenuBtn" class="gear-btn" title="菜单">⚙️</button>
         <div id="gearMenu" class="gear-dropdown" style="display: none;">
+          <button id="quickAddBtn" class="gear-menu-item">
+            <span class="gear-menu-icon">➕</span>
+            <span>快速添加</span>
+          </button>
           <button id="editModeBtn" class="gear-menu-item">
             <span class="gear-menu-icon">🔐</span>
             <span>编辑排序</span>

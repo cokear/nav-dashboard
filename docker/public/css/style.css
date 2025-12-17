@@ -1609,6 +1609,50 @@ body {
   min-height: 1.2rem;
 }
 
+/* ==================== 快速添加弹窗 ==================== */
+.quick-add-modal {
+  max-width: 400px;
+}
+
+.quick-add-logo-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.quick-add-logo-row input {
+  flex: 1;
+  margin-bottom: 0 !important;
+}
+
+.btn-sm {
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.8rem !important;
+  white-space: nowrap;
+}
+
+.quick-add-logo-preview {
+  min-height: 40px;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-add-logo-preview img {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+/* 暗色模式快速添加 */
+.dark-mode .quick-add-modal input {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
 /* ==================== 编辑模式样式 ==================== */
 body.edit-mode .site-card {
   cursor: grab;
