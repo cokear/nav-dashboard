@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const db = require('./db');
+const backup = require('./backup');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -803,6 +804,84 @@ app.post('/api/import/bookmarks', express.text({ type: 'text/html', limit: '5mb'
     }
 });
 
+// ==================== WebDAV 备份 API ====================
+
+// 获取备份配置
+app.get('/api/backup/config', (req, res) => {
+    const config = backup.getBackupConfig(db);
+    // 不返回密码明文
+    if (config.webdav_password) {
+        config.webdav_password = '******';
+    }
+    res.json({ success: true, data: config });
+});
+
+// 保存备份配置
+app.put('/api/backup/config', (req, res) => {
+    try {
+        const { webdav_url, webdav_username, webdav_password, backup_frequency } = req.body;
+
+        backup.saveBackupConfig(db, {
+            webdav_url,
+            webdav_username,
+            webdav_password,
+            backup_frequency
+        });
+
+        // 重新设置定时任务
+        backup.setupScheduledBackup(db);
+
+        res.json({ success: true, message: '备份配置已保存' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// 测试 WebDAV 连接
+app.post('/api/backup/test', async (req, res) => {
+    try {
+        const { webdav_url, webdav_username, webdav_password } = req.body;
+        const result = await backup.testConnection(webdav_url, webdav_username, webdav_password);
+        res.json(result);
+    } catch (error) {
+        res.json({ success: false, error: error.message });
+    }
+});
+
+// 立即执行备份
+app.post('/api/backup/now', async (req, res) => {
+    try {
+        const result = await backup.performBackup(db);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// 获取云端备份列表
+app.get('/api/backup/list', async (req, res) => {
+    try {
+        const backups = await backup.listBackups(db);
+        res.json({ success: true, data: backups });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// 从云端恢复
+app.post('/api/backup/restore', async (req, res) => {
+    try {
+        const { filename } = req.body;
+        if (!filename) {
+            return res.status(400).json({ success: false, message: '请指定备份文件' });
+        }
+        const result = await backup.restoreBackup(db, filename);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // SPA 回退
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
@@ -810,5 +889,8 @@ app.get('*', (req, res) => {
 
 // 启动服务
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Nav Dashboard v1.1.0 运行在 http://localhost:${PORT}`);
+    console.log(`🚀 Nav Dashboard v1.2.0 运行在 http://localhost:${PORT}`);
+
+    // 初始化定时备份
+    backup.setupScheduledBackup(db);
 });
