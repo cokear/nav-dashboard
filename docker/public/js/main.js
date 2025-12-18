@@ -443,6 +443,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setupInfiniteScroll();
     registerServiceWorker();
     setupKeyboardShortcuts();
+    initPwaPrompt();
+    setupCopyLinks();
 });
 
 // ==================== 快捷键 ====================
@@ -510,6 +512,126 @@ function registerServiceWorker() {
     }
 }
 
+// ==================== PWA 安装提示 ====================
+
+let deferredPrompt = null;
+
+// 监听 beforeinstallprompt 事件
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // 检查是否已经安装或已关闭过提示
+    if (localStorage.getItem('pwaDismissed')) return;
+
+    // 移动端显示安装提示
+    if (isMobile()) {
+        setTimeout(() => {
+            const prompt = document.getElementById('pwaPrompt');
+            if (prompt) prompt.style.display = 'flex';
+        }, 3000); // 3秒后显示
+    }
+});
+
+// 检测移动端
+function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// 初始化 PWA 提示
+function initPwaPrompt() {
+    const installBtn = document.getElementById('pwaInstall');
+    const closeBtn = document.getElementById('pwaClose');
+    const prompt = document.getElementById('pwaPrompt');
+
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('PWA install:', outcome);
+                deferredPrompt = null;
+            }
+            if (prompt) prompt.style.display = 'none';
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            if (prompt) prompt.style.display = 'none';
+            localStorage.setItem('pwaDismissed', 'true');
+        });
+    }
+}
+
+// ==================== 复制链接功能 ====================
+
+// 复制到剪贴板
+async function copyToClipboard(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        showCopyToast();
+    } catch (err) {
+        // 降级方案
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showCopyToast();
+    }
+}
+
+// 显示复制成功提示
+function showCopyToast() {
+    const toast = document.getElementById('copyToast');
+    if (toast) {
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 1500);
+    }
+}
+
+// 设置站点卡片右键复制
+function setupCopyLinks() {
+    document.addEventListener('contextmenu', (e) => {
+        const card = e.target.closest('.site-card');
+        if (card && card.href) {
+            e.preventDefault();
+            copyToClipboard(card.href);
+        }
+    });
+
+    // 移动端长按复制
+    let longPressTimer = null;
+    document.addEventListener('touchstart', (e) => {
+        const card = e.target.closest('.site-card');
+        if (card && card.href) {
+            longPressTimer = setTimeout(() => {
+                e.preventDefault();
+                copyToClipboard(card.href);
+            }, 600);
+        }
+    });
+
+    document.addEventListener('touchend', () => {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+    });
+
+    document.addEventListener('touchmove', () => {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+    });
+}
 
 
 // ==================== 编辑模式 ====================

@@ -1834,3 +1834,108 @@ body.edit-mode .edit-mode-hint {
   color: rgba(255, 255, 255, 0.6);
   border-top-color: rgba(255, 255, 255, 0.1);
 }
+
+/* ==================== PWA 安装提示 ==================== */
+.pwa-prompt {
+  position: fixed;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #a78bfa, #e879f9);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 32px rgba(167, 139, 250, 0.4);
+  z-index: 2000;
+  font-size: 0.9rem;
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.pwa-btn {
+  background: white;
+  color: #a78bfa;
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pwa-btn:hover {
+  transform: scale(1.05);
+}
+
+.pwa-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.8;
+  padding: 0 0.25rem;
+}
+
+.pwa-close:hover {
+  opacity: 1;
+}
+
+/* ==================== 复制成功提示 ==================== */
+.copy-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  z-index: 3000;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.copy-toast.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* 移动端适配 */
+@media (max-width: 600px) {
+  .pwa-prompt {
+    bottom: 4.5rem;
+    left: 1rem;
+    right: 1rem;
+    transform: none;
+    font-size: 0.85rem;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}

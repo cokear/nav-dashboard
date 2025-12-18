@@ -4,14 +4,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="导航站">
   <title>导航站</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="stylesheet" href="/css/style.css?v=14">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css?v=15">
 </head>
 
 <body>
   <!-- 暗色模式切换 -->
   <button id="themeToggle" class="theme-toggle" title="切换主题">🌙</button>
+
+  <!-- PWA 安装提示 -->
+  <div id="pwaPrompt" class="pwa-prompt" style="display: none;">
+    <span>📲 添加到主屏幕，获得 App 体验</span>
+    <button id="pwaInstall" class="pwa-btn">安装</button>
+    <button id="pwaClose" class="pwa-close">×</button>
+  </div>
+
+  <!-- 复制成功提示 -->
+  <div id="copyToast" class="copy-toast">✓ 链接已复制</div>
 
   <!-- 密码验证弹窗 -->
   <div id="passwordModal" class="password-modal" style="display: none;">
@@ -136,7 +151,7 @@
     </a>
   </footer>
 
-  <script src="/js/main.js?v=8"></script>
+  <script src="/js/main.js?v=9"></script>
 </body>
 
 </html>
