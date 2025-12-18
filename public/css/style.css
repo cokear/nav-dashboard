@@ -229,6 +229,8 @@ body {
   border-radius: 50px;
   max-width: 500px;
   width: 100%;
+  position: relative;
+  z-index: 99999;
 }
 
 .search-box-center .search-engine-select {
