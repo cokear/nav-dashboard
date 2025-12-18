@@ -441,8 +441,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCategories();
     setupSearch();
     setupInfiniteScroll();
-    showGreeting();
-    loadSiteStats();
     registerServiceWorker();
     setupKeyboardShortcuts();
 });
@@ -512,45 +510,7 @@ function registerServiceWorker() {
     }
 }
 
-// ==================== 时间问候 & 站点统计 ====================
 
-// 获取时间问候语
-function getGreeting() {
-    const hour = new Date().getHours();
-    if (hour < 6) return '🌙 夜深了';
-    if (hour < 9) return '🌅 早上好';
-    if (hour < 12) return '☀️ 上午好';
-    if (hour < 14) return '🌞 中午好';
-    if (hour < 18) return '🌤️ 下午好';
-    if (hour < 22) return '🌆 晚上好';
-    return '🌙 夜深了';
-}
-
-// 显示时间问候横幅
-function showGreeting() {
-    const banner = document.getElementById('greetingBanner');
-    if (banner) {
-        banner.textContent = getGreeting();
-    }
-}
-
-// 加载站点统计
-async function loadSiteStats() {
-    try {
-        const response = await fetch(`${API_BASE}/api/sites?pageSize=1000`);
-        const data = await response.json();
-
-        if (data.success) {
-            const total = data.pagination?.total || data.data?.length || 0;
-            const statsEl = document.getElementById('siteStats');
-            if (statsEl) {
-                statsEl.innerHTML = `<span class="stats-icon">📚</span> 收录了 ${total} 个站点`;
-            }
-        }
-    } catch (error) {
-        console.error('加载站点统计失败:', error);
-    }
-}
 
 // ==================== 编辑模式 ====================
 
