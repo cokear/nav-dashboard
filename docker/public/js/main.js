@@ -933,6 +933,7 @@ function initQuickAdd() {
     const quickAddLogo = document.getElementById('quickAddLogo');
     const quickAddFetch1 = document.getElementById('quickAddFetch1');
     const quickAddFetch2 = document.getElementById('quickAddFetch2');
+    const quickAddDefault = document.getElementById('quickAddDefault');
     const quickAddLogoPreview = document.getElementById('quickAddLogoPreview');
     const quickAddCancelBtn = document.getElementById('quickAddCancelBtn');
     const quickAddConfirmBtn = document.getElementById('quickAddConfirmBtn');
@@ -1030,6 +1031,15 @@ function initQuickAdd() {
             quickAddError.textContent = 'URL格式无效';
         }
     });
+
+    // 使用默认图标
+    if (quickAddDefault) {
+        quickAddDefault.addEventListener('click', () => {
+            quickAddLogo.value = DEFAULT_ICON;
+            updateQuickAddPreview(DEFAULT_ICON);
+            quickAddError.textContent = '';
+        });
+    }
 
     // Logo输入变化时更新预览
     quickAddLogo.addEventListener('input', (e) => {
